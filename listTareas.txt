@@ -1,3 +1,0 @@
-1.ampliar la funcionalidad de la clase/ function gameBoard 
-2. ahora que tengo el board, las naves lo que sigue es buscar el posicionamiento de las naves y buscar una forma the almacenar esta pocison (dentro del board o en una lista aparte?)
-3. implementar el disparo (turnos? primero?) y el recibir dano
