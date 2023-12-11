@@ -22,24 +22,14 @@
 //     return list;
 // }
 // class GameBoard {
-//     board = [];
+//     listCoordinates = [];
+//     listUnavailable = [];
 //     constructor() {
 //         this.board = this.drawBoard();
 //     }
 //     drawBoard() {
-//         let list = [];
-//         for (let i = 0; i < 10; i++) {
-//             let partialL = [];
-//             for (let j = 0; j < 10; j++) {
-//                 partialL.push(j);
-//                 // let square = document.createElement("div");
-//                 // square.setAttribute("class", "square");
-//                 // square.setAttribute("data", `${i},${j}`);
-//                 // board.appendChild(square);
-//             }
-//             list.push(partialL)
-//         }
-//         return list;
+
+
 //     }
 
 //     positionShip() {
@@ -57,16 +47,16 @@
 
 
 function GameBoard() {
+}
 
-    let listCoordinates = [];
-    let listUnavailable = [];
+let listCoordinates = [];
+let listUnavailable = [];
 
-    function makeBoard() {
-        for (let i = 0; i <= 99; i++) {
-            listCoordinates[i] = false;
-        }
-        return listCoordinates;
+function makeBoard() {
+    for (let i = 0; i <= 99; i++) {
+        listCoordinates[i] = false;
     }
+    return listCoordinates;
 }
 // ####Start HERE####
 function positionShip(size) {
@@ -149,72 +139,91 @@ function direcction(starPoint, sizeShip) {
 
 }
 
-// check the points of a ship base on his length
-// return the points to build the ship [0] and all the points around the ship
-function checkPoints(point, sizeShip, direccion) {
-    let lisForShip = [];
-    let TotalPerimeter = [];
-    let result = [];
 
-    for (let i = 0; i < sizeShip; i++) {
-        //check around the point if the space is available
-        // false means a ship in that position
-        let partial = helperCheckPst(point);
-        if (partial !== false) {
-            lisForShip.push(point);
-            partial.forEach(element => {
-                if (!TotalPerimeter.includes(element) && !lisForShip.includes(element)) {
-                    TotalPerimeter.push(element)
+function preCheckPot(point, sizeShip, direccion) {
+
+    let listCoordinates = makeBoard();
+    // check the points of a ship base on his length
+    // return the points to build the ship [0] and all the points around the ship
+    function checkPoints(point, sizeShip, direccion) {
+        let listShipPoints = [];
+        let TotalPerimeter = [];
+        let result = [];
+
+        for (let i = 0; i < sizeShip; i++) {
+            //check around the point if the space is available
+            // false means a ship in that position
+            let partial = helperCheckPst(point);
+            if (partial !== false) {
+                if (point >= 0 && point <= 99) {
+                    listShipPoints.push(point);
+
                 }
-            });
-
-            if (direccion > 0) {
+                TotalPerimeter.push(...partial)
                 point += direccion;
+                // if (direccion > 0) {
+                // } else {
+                //     point += direccion;
+                // }
             } else {
-                point -= direccion;
+                break
             }
-        } else {
-            break
+
         }
+        // filter the points around
+        let fPartial = [];
+        TotalPerimeter.forEach(element => {
+            if (!listShipPoints.includes(element) && listCoordinates[element] != undefined && !fPartial.includes(element)) {
+                fPartial.push(element)
+            }
+        });
+
+
+        result.push(listShipPoints, fPartial)
+        return result;
+    }
+    // check all the direccions around a point,
+    // return the perimeter around a point
+    function helperCheckPst(pointStr) {
+        let baseRow = Math.floor(pointStr / 10);
+        let baseCol = pointStr % 10
+
+        let partialPerimeter = []
+        let topes = []
+        let total = 8;
+        // if the point is at the end of the columns still be a valid position  
+        if (baseCol == 9) {
+            topes.push(...[pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1])
+            // if the point is at the begining of the columns
+        } if (baseCol == 0) {
+            topes.push(...[pointStr - 1, (pointStr - 10) - 1, (pointStr + 10) - 1]);
+        }
+        // if (baseRow == 0) {
+        //     topes.push(...[pointStr - 10, (pointStr - 10) - 1, (pointStr - 10) + 1]);
+        // } if (baseRow == 9) {
+        //     topes.push(...[pointStr + 10], po)
+        // }
+
+        let cases = [pointStr - 1, pointStr + 1, pointStr - 10, pointStr + 10, (pointStr - 1) + 10, (pointStr - 1) - 10, (pointStr + 1) + 10, (pointStr + 1) - 10]
+        cases.forEach(element => {
+            if (listCoordinates[element] == false || listCoordinates[element] == undefined || topes.includes(element)) {
+                total--;
+            }
+            // ?????????? check here look like the topes are no workin
+            // do not interest to include points that are undefined or points that are out of range
+            if (!(topes.includes(element)) && listCoordinates[element] != undefined) {
+                //?????????????????? add points that are already in the list ???
+                partialPerimeter.push(element)
+            }
+        });
+        return total === 0 ? partialPerimeter : false;
+
 
     }
-    result.push(lisForShip, TotalPerimeter)
-    return result;
-}
-// check all the direccions around a point,
-// return the perimeter around a point
-function helperCheckPst(pointStr) {
-    let baseRow = pointStr % (pointStr % 10);
-    let baseCol = pointStr % 10;
-
-    let partialPerimeter = []
-    let topes = []
-    let total = 8;
-    // if the point is at the end of the columns still be a valid position  
-    if (baseCol == 9) {
-        topes = [pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1]
-        // if the point is at the begining of the columns
-    } if (baseCol == 0) {
-        topes = [pointStr - 1, (pointStr - 10) - 1, (pointStr + 10) - 1]
-    }
-
-    let cases = [pointStr - 1, pointStr + 1, pointStr - 10, pointStr + 10, (pointStr - 1) + 10, (pointStr - 1) - 10, (pointStr + 1) + 10, (pointStr + 1) - 10]
-    cases.forEach(element => {
-        if (listCoordinates[element] == false || listCoordinates[element] == undefined || topes.includes(element)) {
-            total--;
-        }
-        // do not interest to include points that are undefined or points that are out of range
-        if (!(topes.includes(element)) && listCoordinates[element] != undefined) {
-            //?????????????????? add points that are already in the list ???
-            partialPerimeter.push(element)
-        }
-    });
-    return total === 0 ? partialPerimeter : false;
+    return checkPoints(point, sizeShip, direccion);
 
 
 }
-
-
 
 
 // pointer will be asumme as the direction 
@@ -234,13 +243,15 @@ function getRandomInt(min = 0, max = 99) {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
-makeBoard();
-positionShip(2);
-return listCoordinates
+// makeBoard();
+// positionShip(2);
+// return listCoordinates
 
 
-GameBoard()
-
+// GameBoard()
+let shipD5 = preCheckPot(79, 2, 1)
 
 
 module.exports = GameBoard;
+module.exports = preCheckPot;
+
