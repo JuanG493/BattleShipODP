@@ -1,5 +1,3 @@
-
-
 class Ship {
     #hitsRecived = 0;
     #sunk = false;
@@ -54,23 +52,23 @@ class Ship {
     #setType() {
         switch (this.#lenghtShip) {
             case 1:
-                this._tipe = "boat"
+                this.#tipe = "boat"
                 break;
             case 2:
-                this._tipe = "Patrol Boat"
+                this.#tipe = "Patrol Boat"
                 break
             case 3:
-                this._tipe = "Submarine"
+                this.#tipe = "Submarine"
                 break
             case 4:
-                this._tipe = "Destroyer"
+                this.#tipe = "Destroyer"
                 break
             default:
-                this._tipe = "Carrier"
+                this.#tipe = "Carrier"
                 break;
         }
     }
 }
 
-// export { Ship }
-module.exports = Ship;
+export { Ship }
+// module.exports = Ship;

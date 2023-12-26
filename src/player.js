@@ -1,10 +1,10 @@
-// import { GameBoard } from "./gameBoard.js"
-// import { Ship } from "./ship.js";
+import { GameBoard } from "./gameBoard.js"
+import { Ship } from "./ship.js";
 
-const GameBoard = require('./gameBoard');
-const Ship = require('./ship');
+// const GameBoard = require('./gameBoard');
+// const Ship = require('./ship');
 
-class Player {
+export default class Player {
     board;
     listShips = [];
     mode;
@@ -32,5 +32,5 @@ class Player {
     }
 
 }
-// export { Player }
-module.exports = Player;
+// export { Player };
+// module.exports = Player;
