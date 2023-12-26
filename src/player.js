@@ -11,9 +11,9 @@ class Player {
 
 
     constructor(mode = "normal") {
-        this.board = new GameBoard;
         this.setModeGame(mode);
         this.setShips();
+        this.board = new GameBoard(this.listShips);
 
     }
 
@@ -24,7 +24,7 @@ class Player {
             this.mode = 7;
         }
     }
-
+    // fill the array with the ships of random size (1 and 5)
     setShips() {
         for (let i = 0; i < this.mode; i++) {
             this.listShips.push(new Ship())

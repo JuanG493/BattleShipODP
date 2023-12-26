@@ -9,6 +9,7 @@ class Ship {
     constructor(lenght = this.#setLenghtNewShip()) {
         if (lenght >= 1 && lenght <= 5) {
             this.#lenghtShip = lenght;
+            // do I need this ?
         } else {
             this.#lenghtShip = this.#setLenghtNewShip();
         }
