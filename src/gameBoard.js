@@ -178,24 +178,3 @@ export { GameBoard }
 
 
 
-
-// function GameBoard() {
-
-//     let rows = 10;
-//     let cols = 10;
-//     let list = [];
-//     for (let i = 0; i < rows; i++) {
-//         list[i] = [];
-//         // let partialL = [];
-//         for (let j = 0; j < cols; j++) {
-//             list[i][j] = j
-//             // partialL.push(j);
-//             // let square = document.createElement("div");
-//             // square.setAttribute("class", "square");
-//             // square.setAttribute("data", `${i},${j}`);
-//             // board.appendChild(square);
-//         }
-//         // list.push(partialL)
-//     }
-//     return list;
-// }

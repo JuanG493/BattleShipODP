@@ -1,5 +1,4 @@
 import Player from "./player.js";
-// import "./style.css";
 
 // flow
 // make the Player 
@@ -10,32 +9,56 @@ import Player from "./player.js";
 
 let player = new Player();
 console.log(player);
+
+let board = document.querySelector("#board");
+let indLeft = document.querySelector("#ind_left");
+let indRight = document.querySelector("#ind_right");
+
+
 // class Testin {
 //     player1;
 
 
-//     constructor() {
-//         console.log("juan")
-//         this.player = new Player();
-//         console.log(this.player);
-//     }
 
-//     // let modoJuego = "normal"
-//     // console.log(player1);
+function drawBoard(player) {
+    let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
 
-//     // pointer will be asumme as the direction 
-//     dockyard(ListOfPoints) {
-//         ListOfPoints[0].forEach(element => {
-//             console.log("elementos", element);
+    let coord = Object.values(player.board)[0];
+    let contador = 0;
+    coord.forEach(element => {
+        if (contador < 10) {
+            // // indLeft
+            // if(contador == 0){
+            // let aditional= document.createElement("div");
+            // indLeft
 
-//         });
-//         ListOfPoints[1].forEach(element => {
-//             console.log(element)
+            // }
+            let ind = document.createElement("div");
+            ind.innerText = contador + 1;
+            indLeft.appendChild(ind)
 
-//         });
-//     }
-// }
+            let sInd = document.createElement("div");
+            sInd.innerText = letter[contador]
+            indRight.appendChild(sInd)
+            // square.setAttribute("data", `${contador}`);
 
-// let test = new Testin();
+        }
+        let square = document.createElement("div");
+        square.setAttribute("class", `${element}`);
+        square.setAttribute("data", `${contador}`);
+        board.appendChild(square);
+        contador++;
 
-// export { testin };
+    });
+
+}
+drawBoard(player);
+
+
+
+
+
+function turns(params) {
+
+}
+

@@ -2,7 +2,7 @@ class Ship {
     #hitsRecived = 0;
     #sunk = false;
     #lenghtShip = 0;
-    #tipe;
+    #type;
 
     constructor(lenght = this.#setLenghtNewShip()) {
         if (lenght >= 1 && lenght <= 5) {
@@ -26,7 +26,7 @@ class Ship {
         return this.#lenghtShip;
     }
     getType() {
-        return this.#tipe;
+        return this.#type;
     }
 
     #setLenghtNewShip() {
@@ -52,19 +52,19 @@ class Ship {
     #setType() {
         switch (this.#lenghtShip) {
             case 1:
-                this.#tipe = "boat"
+                this.#type = "boat"
                 break;
             case 2:
-                this.#tipe = "Patrol Boat"
+                this.#type = "Patrol Boat"
                 break
             case 3:
-                this.#tipe = "Submarine"
+                this.#type = "Submarine"
                 break
             case 4:
-                this.#tipe = "Destroyer"
+                this.#type = "Destroyer"
                 break
             default:
-                this.#tipe = "Carrier"
+                this.#type = "Carrier"
                 break;
         }
     }
