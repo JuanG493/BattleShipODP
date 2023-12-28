@@ -14,14 +14,68 @@
 <body>
     <header></header>
     <main>
-        <div id="all_board">
-            <div id="ind_left"></div>
-            <div>
-                <div id="ind_right"></div>
-                <div id="board"></div>
+        <div id="container">
 
-            </div>
+            <section id="position_board">
+
+                <h3>Position Board</h3>
+                <div class="all_board">
+                    <div class="pst_ind_left"></div>
+                    <div>
+                        <div class="pst_ind_right"></div>
+                        <div id="board_pst"></div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="atack_board">
+
+                <h3>Attack Board</h3>
+                <div class="all_board">
+                    <div class="atk_ind_left"></div>
+                    <div>
+                        <div class="atk_ind_right"></div>
+                        <div id="board_atk"></div>
+                    </div>
+                </div>
+            </section>
         </div>
+
+        <section id="show_ships"></section>
+        <section id="buttons_play">
+            <fieldset id="mode">
+                <legend>Mode</legend>
+                <input type="radio" class="md" id="normal" name="mode" value="N" checked />
+                <label for="normal">Normal</label><br />
+
+                <input type="radio" class="md" id="russian" name="mode" value="R" />
+                <label for="russian">Russian</label><br />
+
+                <input type="radio" id="hardcore" class="md" name="mode" value="H" />
+                <label for="hardcore">HardCore</label>
+            </fieldset>
+            <fieldset id="game">
+                <legend>Opponent</legend>
+                <input type="radio" class="opp" id="vsMaquina" name="opp" value="1" checked />
+                <label for="vsMaquina">1 Vs Maquina</label><br />
+
+                <input type="radio" class="opp" id="vsFriend" name="opp" value="2" />
+                <label for="vsFriend">Friend</label><br />
+
+            </fieldset>
+            </div>
+            <button id="mk_army">Make Army</button>
+            <button id="rand">Random</button>
+            <button id="play">Play</button>
+            <button id="restar">Restar</button>
+
+
+        </section>
+        <section>
+            <div id="display_turn"></div>
+        </section>
+
     </main>
     <footer></footer>
 

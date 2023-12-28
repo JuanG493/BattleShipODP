@@ -1,58 +1,194 @@
 import Player from "./player.js";
 
-// flow
-// make the Player 
-//     the player have a array with ships 
-//     the player have a board     
-//         pass the array of navis to the board to set the position
-// select a point -> direccion -> check around for the available space
-
-let player = new Player();
-console.log(player);
-
-let board = document.querySelector("#board");
-let indLeft = document.querySelector("#ind_left");
-let indRight = document.querySelector("#ind_right");
 
 
-// class Testin {
-//     player1;
+let positionBoard = document.querySelector("#board_pst");
+let pstY = document.querySelector(".pst_ind_left");
+let pstX = document.querySelector(".pst_ind_right");
+
+let attackBoard = document.querySelector("#board_atk");
+let atkY = document.querySelector(".atk_ind_left");
+let atkX = document.querySelector(".atk_ind_right");
+
+
+let btnMakeArmy = document.querySelector("#mk_army")
+
+// let mode = document.querySelector("#mode");
 
 
 
-function drawBoard(player) {
-    let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+function started() {
+    drawBasicBoard(positionBoard, pstY, pstX)
+    drawBasicBoard(attackBoard, atkY, atkX)
+    let mode;
+    let selectOponent;
+    let oponent = null;
+    //button make army create the player and their ships
+    btnMakeArmy.addEventListener("click", () => {
 
-    let coord = Object.values(player.board)[0];
-    let contador = 0;
-    coord.forEach(element => {
-        if (contador < 10) {
-            // // indLeft
-            // if(contador == 0){
-            // let aditional= document.createElement("div");
-            // indLeft
+        //select the game mode
+        let radiosBtns = document.querySelectorAll(".md");
+        radiosBtns.forEach(element => {
+            if (element.checked) {
+                mode = element.value;
+            }
+        });
 
-            // }
-            let ind = document.createElement("div");
-            ind.innerText = contador + 1;
-            indLeft.appendChild(ind)
+        //select the oponent
+        let tempOponent = document.querySelectorAll(".opp");
+        selectOponent = tempOponent[0].checked ? "maquina" : "friend";
 
-            let sInd = document.createElement("div");
-            sInd.innerText = letter[contador]
-            indRight.appendChild(sInd)
-            // square.setAttribute("data", `${contador}`);
+
+        if (selectOponent == "maquina") {
+            oponent = new Player(mode);
+            console.log(oponent);
 
         }
-        let square = document.createElement("div");
-        square.setAttribute("class", `${element}`);
-        square.setAttribute("data", `${contador}`);
-        board.appendChild(square);
-        contador++;
+        //create the player with a mode
+        let player = new Player(mode);
+        positionShipsOn(player)
+
+        flow(player, oponent)
+    })
+}
+
+started()
+
+function flow(player1, player2) {
+    let displayResult = document.querySelector("#display_turn");
+    let pointPj1 = player1.getTotalPoints();
+    let pointPj2 = player2.getTotalPoints();
+    let target
+
+    // mientras exista una nave en el campo de batalla
+    while (pointPj1 > 0 && pointPj2 > 0) {
+        displayResult.innerText = "your turn"
+
+        // let points = await testi();
+        // then(console.log(234234));
+
+
+        // break;
+        attackBoard.addEventListener("click", (event) => {
+            target = event.target;
+            console.log(target);
+            event.preventDefault()
+        }, { once: true })
+
+        break
+
+
+    }
+
+}
+
+function testi() {
+    let squaresAtrack = document.querySelectorAll(".squareAttack")
+
+
+    for (const iterator of squaresAtrack) {
+        iterator.addEventListener("click", () => {
+            let selectPoint = iterator.attributes[0].nodeValue;
+            // attack(selectPoint)
+            return selectPoint
+        })
+
+
+
+    }
+
+
+
+    return point;
+
+}
+
+function attack(point) {
+    console.log(point);
+    // console.log();
+    // if (player.board.listCoordinates[point]) {
+    //     console.log("hit");
+
+    // } else {
+    //     console.log("no hit");
+    // }
+
+}
+
+
+// position the ships of a player
+function positionShipsOn(player) {
+    let listNav = player.listShips;
+    listNav.forEach(nav => {
+        // console.log(nav.getPositions());
+        // let tst = nav;
+        // console.log(nav.getId());
+        marker(nav.getPositions(), nav.getId())
+
+    });
+
+
+    // let square = document.createElement("div");
+    // square.setAttribute("class", `${element}`);
+    // square.setAttribute("data", `${counter}`);
+    // positionBoard.appendChild(square);
+    // counter++;
+
+    // square.addEventListener("click", () => {
+    //     let selectedPoint = square.attributes[1].nodeValue;
+    //     attack(selectedPoint)
+    // })
+
+}
+//draw the point in the board
+function marker(arrylist, id) {
+
+    // console.log(identifier);
+    arrylist.forEach(elm => {
+        let tempo = document.querySelector(`div[value="${elm}"]`)
+        //limpiar despues de crear
+        tempo.setAttribute('class', `${id}`)
+        tempo.classList.add("ship")
+        // tempo.setAttribute("class", "ship");
+
+        // console.dir(tempo);
 
     });
 
 }
-drawBoard(player);
+
+function drawBasicBoard(targetBoard, y, x) {
+    let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+    for (let i = 0; i < 100; i++) {
+        if (i < 10) {
+
+            let ind = document.createElement("div");
+            ind.innerText = i + 1;
+            y.appendChild(ind)
+
+            let sInd = document.createElement("div");
+            sInd.innerText = letter[i]
+            x.appendChild(sInd)
+
+        }
+        let square = document.createElement("div");
+        square.setAttribute("value", `${i}`);
+        targetBoard.appendChild(square);
+        if (targetBoard != positionBoard) {
+            square.classList.add("squareAttack")
+
+        }
+        //put the event listener only in the attack board
+        // if (targetBoard != positionBoard) {
+        //     square.addEventListener("click", () => {
+        //         let selectPoint = square.attributes[0].nodeValue;
+        //         attack(selectPoint)
+        //     })
+        // }
+    }
+
+}
+
 
 
 

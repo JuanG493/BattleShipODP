@@ -3,6 +3,7 @@ class Ship {
     #sunk = false;
     #lenghtShip = 0;
     #type;
+    #positions = [];
 
     constructor(lenght = this.#setLenghtNewShip()) {
         if (lenght >= 1 && lenght <= 5) {
@@ -35,11 +36,23 @@ class Ship {
         return Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
     }
 
+    setPosition(listOfPositions) {
+        this.#positions = listOfPositions;
+    }
+
+    getPositions() {
+        return this.#positions;
+    }
+    getId() {
+        const regex = /,/g
+        return (this.getType() + this.getPositions().toString().replace(regex, "_")).replace(" ", "_")
+    }
+
     hit() {
-        if (this.#lenghtShip >= 1) {
+        if (!this.getSunk()) {
             this.#hitsRecived += 1;
         }
-        this.#setSunk;
+        this.#setSunk();
     }
 
     #setSunk() {

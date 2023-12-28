@@ -1,4 +1,5 @@
 
+
 //recive a array of ships to set the position on the board like {1,2,5,3} where each int represent a size
 // TODO //1.makeboard //2. set the position of boards
 
@@ -10,9 +11,7 @@ class GameBoard {
         this.makeBoard();
         armada.forEach(nav => {
             // console.dir(nav.getSizeShip());
-            let positionsNav = this.positionShip(nav.getSizeShip());
-            //set the coordinates of nav into the nav
-            nav.setPosition(positionsNav);
+            this.positionShip(nav.getSizeShip());
         })
     }
 
@@ -21,7 +20,7 @@ class GameBoard {
             this.listCoordinates[i] = false;
         }
     }
-    //loop until find a valid position for set the ship.
+
     positionShip(size) {
         let position;
         let bluprint;
@@ -38,11 +37,8 @@ class GameBoard {
                 }
             }
         }
-        // bluprint[0] are the points to construct the Ship
-        // fill the global variables with the values
-        bluprint[0].map((elm) => this.listCoordinates[elm] = true)
+        bluprint[0].map((elm) => { this.listCoordinates[elm] = true })
         this.listUnavailable.push(...[...bluprint[1]]);
-        return bluprint[0];
     }
 
     // take a point of star and determine a direction to build the ship 
@@ -149,7 +145,7 @@ class GameBoard {
             (pointStr + 1) - 10
         ]
         pointsAround.forEach(element => {
-            //check if it is a valid even if it is out of the board
+            //check if it is a valid even if are out of the board
             if (topes.includes(element)) {
                 total--;
             } else if (this.listCoordinates[element] == false) {
@@ -168,18 +164,4 @@ class GameBoard {
 // module.exports = GameBoard;
 export { GameBoard }
 // module.exports = checkPoints;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
