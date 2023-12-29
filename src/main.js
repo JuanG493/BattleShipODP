@@ -59,26 +59,42 @@ function flow(player1, player2) {
     let pointPj1 = player1.getTotalPoints();
     let pointPj2 = player2.getTotalPoints();
     let target
+    // let hitPoint = await getHitPoint();
 
+    let pointTarget;
+    attackBoard.addEventListener("click", async e => {
+        pointTarget = e.target.attributes[0].nodeValue;
+        let total = await checkHit(pointTarget)
+        if (total > 3) {
+            console.log("saldjfklasjf");
+        }
+    }, { once: true })
+
+    // console.log(hitPoint
     // mientras exista una nave en el campo de batalla
-    while (pointPj1 > 0 && pointPj2 > 0) {
-        displayResult.innerText = "your turn"
+    // while (pointPj1 != 0 && pointPj2 != 0) {
+    //     displayResult.innerText = "your turn"
+    //     // let points = await testi();
+    //     // then(console.log(234234));
+    //     break;
+    // }
 
-        // let points = await testi();
-        // then(console.log(234234));
+}
+// function getHitPoint() {
+//     let pointTarget;
+//     attackBoard.addEventListener("click", (event) => {
+//         pointTarget = event.target;
+//         // console.log(target);
+//         // event.preventDefault()
+//     }, { once: true })
+//     return pointTarget;
 
 
-        // break;
-        attackBoard.addEventListener("click", (event) => {
-            target = event.target;
-            console.log(target);
-            event.preventDefault()
-        }, { once: true })
+// }
+async function checkHit(point) {
+    console.log(point)
+    return 5
 
-        break
-
-
-    }
 
 }
 
@@ -127,17 +143,6 @@ function positionShipsOn(player) {
 
     });
 
-
-    // let square = document.createElement("div");
-    // square.setAttribute("class", `${element}`);
-    // square.setAttribute("data", `${counter}`);
-    // positionBoard.appendChild(square);
-    // counter++;
-
-    // square.addEventListener("click", () => {
-    //     let selectedPoint = square.attributes[1].nodeValue;
-    //     attack(selectedPoint)
-    // })
 
 }
 //draw the point in the board
