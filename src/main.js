@@ -10,19 +10,24 @@ let attackBoard = document.querySelector("#board_atk");
 let atkY = document.querySelector(".atk_ind_left");
 let atkX = document.querySelector(".atk_ind_right");
 
+let leftPtsPj1 = document.querySelector("#leftPts_pj1")
+let leftPtsPj2 = document.querySelector("#leftPts_pj2")
+
 
 let btnMakeArmy = document.querySelector("#mk_army")
+let displayTurn = document.querySelector("#display_turn")
 
 // let mode = document.querySelector("#mode");
 
-
+let player = null;
+let oponent = null;
 
 function started() {
     drawBasicBoard(positionBoard, pstY, pstX)
     drawBasicBoard(attackBoard, atkY, atkX)
     let mode;
     let selectOponent;
-    let oponent = null;
+
     //button make army create the player and their ships
     btnMakeArmy.addEventListener("click", () => {
 
@@ -45,20 +50,25 @@ function started() {
 
         }
         //create the player with a mode
-        let player = new Player(mode);
+        player = new Player(mode);
         positionShipsOn(player)
 
-        flow(player, oponent, true)
+        turns(player, oponent, true)
     })
 }
 
 started()
+
 //set the flow of the game, turn is a boolean to know who is playing
 //true -> player || false -> machine
-async function flow(pjCurrentTurn, pjTarget, turn) {
+async function turns(pjCurrentTurn, pjTarget, turn) {
+    drawRemainPoints()
     console.log(pjTarget);
     if (turn) {
-        console.log("Human TURN");
+        displayTurn.innerText = "Human Turn"
+        // console.log("Human TURN");
+    } else {
+        displayTurn.innerText = "Machine Turn"
     }
     //check if it´s posible play
     if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
@@ -71,16 +81,17 @@ async function flow(pjCurrentTurn, pjTarget, turn) {
                 // mark in the map
                 // divTarget.classList.add("hit")
                 let pointTarget = divTarget.attributes[0].nodeValue;
-                drawPointInBoard(attackBoard, pointTarget)
+                drawPointOfAttack(attackBoard, pointTarget)
 
                 let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
                 // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
 
                 if (wasHit) {
+                    navHit(divTarget)
                     //the actual PJ continue with the turn
-                    flow(pjCurrentTurn, pjTarget, true)
+                    turns(pjCurrentTurn, pjTarget, true)
                 } else {
-                    flow(pjTarget, pjCurrentTurn, false)
+                    turns(pjTarget, pjCurrentTurn, false)
                 }
                 // } else {
                 //     console.log("game Over");
@@ -90,7 +101,7 @@ async function flow(pjCurrentTurn, pjTarget, turn) {
 
         } else {
             let played = await playMachine(pjCurrentTurn, pjTarget);
-            flow(pjTarget, pjCurrentTurn, true)
+            turns(pjTarget, pjCurrentTurn, true)
         }
 
     } else {
@@ -99,34 +110,62 @@ async function flow(pjCurrentTurn, pjTarget, turn) {
     }
 
 }
-function drawPointInBoard(board, point) {
-    // console.log(point instanceof board);
+function drawRemainPoints() {
+    leftPtsPj1.innerText = `${player.totalPoints}`
+    leftPtsPj2.innerText = `${oponent.totalPoints}`
+
+}
+function drawPointOfAttack(board, point) {
     if (point != null) {
         let div = board.querySelector(`div[value="${point}"]`)
-        div.innerText = "X"
-        // div.textContent = "x"
-        // div.innerHTML = "<p>x</p>"
-        // console.log(div);
+        div.innerHTML = "<img src='/src/images/redPoint.png'>"
         div.classList.add("hit");
-
     }
-
 }
 
 async function playMachine(machineBoard, humanBoard) {
+    let point;
     let wasHIt;
     do {
-        let point = machineBoard.board.getRandomInt();
-        //select the point on the position board
+        //serch for a point around the last hit
+        //it is think that work afeter ther second iteration
+        if (wasHIt) {
+            let around = serchNerbyPto(point, machineBoard.getMapPointAttk());
 
+            let partialpoint = machineBoard.board.getRandomInt(1, around.length)
+            point = around[partialpoint]
+
+
+        } else {
+            do {
+                point = machineBoard.board.getRandomInt();
+
+            } while (machineBoard.getMapPointAttk(point));
+
+        }
+        //select the point on the position board
         let div = positionBoard.querySelector(`div[value="${point}"]`)
-        console.log(div);
-        div.classList.add("hit")
-        // let wasHIt = checkHit(point)
+        // to go a little slow
+        await timeOut()
+        drawPointOfAttack(positionBoard, point)
+
         wasHIt = await checkHit(point, machineBoard, humanBoard)
+        if (wasHIt) {
+            navHit(div)
+        }
+        machineBoard.setMapPointsAttk(point)
 
     } while (wasHIt);
 
+
+}
+function timeOut(ms = 2000) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+
+}
+
+function navHit(ship) {
+    ship.classList.add("nav_hit")
 
 }
 // check if a ship was hit, if so call the methos to discount points 
@@ -137,8 +176,10 @@ async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
     // attackBoard
     //if hit
     if (coord[point]) {
+
         let ship = playerTarget.identifyShip(point)
         ship.hit()
+        // ship.classList.add("hitNav")
         playerTarget.discountPoint();
         return true
 
@@ -147,17 +188,7 @@ async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
     };
 }
 
-function testi() {
-    let squaresAtrack = document.querySelectorAll(".squareAttack")
-    for (const iterator of squaresAtrack) {
-        iterator.addEventListener("click", () => {
-            let selectPoint = iterator.attributes[0].nodeValue;
-            // attack(selectPoint)
-            return selectPoint
-        })
-    }
-    return point;
-}
+
 // position the ships of a player
 function positionShipsOn(player) {
     let listNav = player.listShips;
@@ -168,8 +199,6 @@ function positionShipsOn(player) {
         marker(nav.getPositions(), nav.getId())
 
     });
-
-
 }
 //draw the point (ship) in the board
 function marker(arrylist, id) {
@@ -180,10 +209,6 @@ function marker(arrylist, id) {
         //limpiar despues de crear
         tempo.setAttribute('class', `${id}`)
         tempo.classList.add("ship")
-        // tempo.setAttribute("class", "ship");
-
-        // console.dir(tempo);
-
     });
 
 }
@@ -211,6 +236,53 @@ function drawBasicBoard(targetBoard, y, x) {
         }
 
     }
+
+}
+
+function serchNerbyPto(pointStr, listSelectdPtos) {
+    let baseRow = Math.floor(pointStr / 10);
+    let baseCol = pointStr % 10
+
+    let partialPerimeter = []
+    let topes = []
+    // let total = 8;
+
+    // if the point is at the end of the columns still be a valid position  
+    if (baseCol == 9) {
+        topes.push(...[pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1])
+        // if the point is at the begining of the columns
+    } if (baseCol == 0) {
+        topes.push(...[pointStr - 1, (pointStr - 10) - 1, (pointStr + 10) - 1]);
+    } if (baseRow == 0) {
+        topes.push(...[pointStr - 10, (pointStr - 10) - 1, (pointStr - 10) + 1]);
+    } if (baseRow == 9) {
+        topes.push(...[pointStr + 10, (pointStr + 10) - 1, (pointStr + 10) + 1])
+    }
+
+    //all the 8 points around
+    let pointsAround = [
+        pointStr - 1,
+        pointStr + 1,
+        pointStr - 10,
+        pointStr + 10,
+        // (pointStr - 1) + 10,
+        // (pointStr - 1) - 10,
+        // (pointStr + 1) + 10,
+        // (pointStr + 1) - 10
+    ]
+    pointsAround.forEach(element => {
+        // //check if it is a valid even if it is out of the board
+        // if (topes.includes(element)) {
+        //     total--;
+        //     //chenge for thee actual points selected ----------------------------------
+        // } 
+        if (listSelectdPtos[element] == undefined) {
+            partialPerimeter.push(element)
+            // total--;
+        }
+    });
+    return partialPerimeter
+
 
 }
 

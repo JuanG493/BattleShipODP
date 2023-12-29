@@ -9,6 +9,7 @@ export default class Player {
     listShips = [];
     numbOfShips = null;
     totalPoints = 0;
+    #mapPointAttk = [];
 
 
 
@@ -62,6 +63,18 @@ export default class Player {
                 return nav
             }
         }
+    }
+
+    getMapPointAttk(pto = 100) {
+        if (pto == 100) {
+            return this.#mapPointAttk
+        } else {
+            return this.#mapPointAttk[pto];
+        }
+    }
+
+    setMapPointsAttk(pto) {
+        this.#mapPointAttk[pto] = true;
     }
 }
 // export { Player };
