@@ -41,97 +41,123 @@ function started() {
 
         if (selectOponent == "maquina") {
             oponent = new Player(mode);
-            console.log(oponent);
+            // console.log(oponent);
 
         }
         //create the player with a mode
         let player = new Player(mode);
         positionShipsOn(player)
 
-        flow(player, oponent)
+        flow(player, oponent, true)
     })
 }
 
 started()
+//set the flow of the game, turn is a boolean to know who is playing
+//true -> player || false -> machine
+async function flow(pjCurrentTurn, pjTarget, turn) {
+    console.log(pjTarget);
+    if (turn) {
+        console.log("Human TURN");
+    }
+    //check if it´s posible play
+    if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
 
-function flow(player1, player2) {
-    let displayResult = document.querySelector("#display_turn");
-    let pointPj1 = player1.getTotalPoints();
-    let pointPj2 = player2.getTotalPoints();
-    let target
-    // let hitPoint = await getHitPoint();
+        if (turn) {
+            attackBoard.addEventListener("click", async e => {
+                let divTarget = e.target
+                console.log("target waas : ", divTarget);
 
-    let pointTarget;
-    attackBoard.addEventListener("click", async e => {
-        pointTarget = e.target.attributes[0].nodeValue;
-        let total = await checkHit(pointTarget)
-        if (total > 3) {
-            console.log("saldjfklasjf");
+                // mark in the map
+                // divTarget.classList.add("hit")
+                let pointTarget = divTarget.attributes[0].nodeValue;
+                drawPointInBoard(attackBoard, pointTarget)
+
+                let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
+                // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
+
+                if (wasHit) {
+                    //the actual PJ continue with the turn
+                    flow(pjCurrentTurn, pjTarget, true)
+                } else {
+                    flow(pjTarget, pjCurrentTurn, false)
+                }
+                // } else {
+                //     console.log("game Over");
+                //     //call function game over
+                // }
+            }, { once: true })
+
+        } else {
+            let played = await playMachine(pjCurrentTurn, pjTarget);
+            flow(pjTarget, pjCurrentTurn, true)
         }
-    }, { once: true })
 
-    // console.log(hitPoint
-    // mientras exista una nave en el campo de batalla
-    // while (pointPj1 != 0 && pointPj2 != 0) {
-    //     displayResult.innerText = "your turn"
-    //     // let points = await testi();
-    //     // then(console.log(234234));
-    //     break;
-    // }
+    } else {
+        console.log("game Over");
+        //call function game over
+    }
 
 }
-// function getHitPoint() {
-//     let pointTarget;
-//     attackBoard.addEventListener("click", (event) => {
-//         pointTarget = event.target;
-//         // console.log(target);
-//         // event.preventDefault()
-//     }, { once: true })
-//     return pointTarget;
+function drawPointInBoard(board, point) {
+    // console.log(point instanceof board);
+    if (point != null) {
+        let div = board.querySelector(`div[value="${point}"]`)
+        div.innerText = "X"
+        // div.textContent = "x"
+        // div.innerHTML = "<p>x</p>"
+        // console.log(div);
+        div.classList.add("hit");
+
+    }
+
+}
+
+async function playMachine(machineBoard, humanBoard) {
+    let wasHIt;
+    do {
+        let point = machineBoard.board.getRandomInt();
+        //select the point on the position board
+
+        let div = positionBoard.querySelector(`div[value="${point}"]`)
+        console.log(div);
+        div.classList.add("hit")
+        // let wasHIt = checkHit(point)
+        wasHIt = await checkHit(point, machineBoard, humanBoard)
+
+    } while (wasHIt);
 
 
-// }
-async function checkHit(point) {
-    console.log(point)
-    return 5
+}
+// check if a ship was hit, if so call the methos to discount points 
+//point -> the selected point on the map
+async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
+    let point = parseInt(unFormatPoint);
+    let coord = Object.values(playerTarget.board)[0];
+    // attackBoard
+    //if hit
+    if (coord[point]) {
+        let ship = playerTarget.identifyShip(point)
+        ship.hit()
+        playerTarget.discountPoint();
+        return true
 
-
+    } else {
+        return false;
+    };
 }
 
 function testi() {
     let squaresAtrack = document.querySelectorAll(".squareAttack")
-
-
     for (const iterator of squaresAtrack) {
         iterator.addEventListener("click", () => {
             let selectPoint = iterator.attributes[0].nodeValue;
             // attack(selectPoint)
             return selectPoint
         })
-
-
-
     }
-
-
-
     return point;
-
 }
-
-function attack(point) {
-    console.log(point);
-    // console.log();
-    // if (player.board.listCoordinates[point]) {
-    //     console.log("hit");
-
-    // } else {
-    //     console.log("no hit");
-    // }
-
-}
-
-
 // position the ships of a player
 function positionShipsOn(player) {
     let listNav = player.listShips;
@@ -145,7 +171,7 @@ function positionShipsOn(player) {
 
 
 }
-//draw the point in the board
+//draw the point (ship) in the board
 function marker(arrylist, id) {
 
     // console.log(identifier);
@@ -161,7 +187,7 @@ function marker(arrylist, id) {
     });
 
 }
-
+//draw the grid and the indicators
 function drawBasicBoard(targetBoard, y, x) {
     let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
     for (let i = 0; i < 100; i++) {
@@ -183,23 +209,10 @@ function drawBasicBoard(targetBoard, y, x) {
             square.classList.add("squareAttack")
 
         }
-        //put the event listener only in the attack board
-        // if (targetBoard != positionBoard) {
-        //     square.addEventListener("click", () => {
-        //         let selectPoint = square.attributes[0].nodeValue;
-        //         attack(selectPoint)
-        //     })
-        // }
+
     }
 
 }
 
 
-
-
-
-
-function turns(params) {
-
-}
 

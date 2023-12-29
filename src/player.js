@@ -7,7 +7,7 @@ import { Ship } from "./ship.js";
 export default class Player {
     board = null;
     listShips = [];
-    sizeNavy = null;
+    numbOfShips = null;
     totalPoints = 0;
 
 
@@ -29,28 +29,40 @@ export default class Player {
             this.totalPoints += iterator.getSizeShip();
         }
     }
+    discountPoint() {
+        this.totalPoints--;
+    }
 
     setModeGame(md) {
         switch (md) {
             case "H":
-                this.sizeNavy = 1;
+                this.numbOfShips = 1;
                 break;
             case "R":
-                this.sizeNavy = 7;
+                this.numbOfShips = 7;
                 break;
             default:
-                this.sizeNavy = 5;
+                this.numbOfShips = 5;
                 break;
         }
     }
 
     // fill the array with the ships of random size (1 and 5)
     setShips() {
-        for (let i = 0; i < this.sizeNavy; i++) {
+        for (let i = 0; i < this.numbOfShips; i++) {
             this.listShips.push(new Ship())
         }
     }
 
+    identifyShip(num) {
+        let intNum = parseInt(num)
+        for (const nav of this.listShips) {
+            let pointsN = Object.values(nav.getPositions());
+            if (pointsN.includes(intNum)) {
+                return nav
+            }
+        }
+    }
 }
 // export { Player };
 // module.exports = Player;
