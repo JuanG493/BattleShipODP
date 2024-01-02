@@ -105,5 +105,5 @@ export default class Player {
         this.#mapPointsOfAttacked[pto] = true;
     }
 }
-// export { Player };
+export { Player };
 // module.exports = Player;
