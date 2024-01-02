@@ -114,13 +114,13 @@
 }
 
 .nav_hit {
-    background-color: red;
+    background-color: rgba(255, 0, 0, 0.39);
     /* border: 1px solid red; */
 }
 
 img {
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
 }
 
 #display_turn {
@@ -129,4 +129,10 @@ img {
     /* background-color: red; */
     font-weight: bold;
 
+}
+
+button:disabled {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
 }

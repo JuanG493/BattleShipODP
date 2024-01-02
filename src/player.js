@@ -9,16 +9,16 @@ export default class Player {
     listShips = [];
     numbOfShips = null;
     totalPoints = 0;
-    #mapPointAttk = [];
+    #mapPointsOfAttacked = [];
+    // #listCornerPoints = [];
+    #lastGoodPositionsOfAtk = [];
+    // #randomSizes = [];
 
-
-
-    constructor(mode) {
+    constructor(mode, listSizeShips) {
         this.setModeGame(mode);
-        this.setShips();
+        this.setShips(listSizeShips);
         this.board = new GameBoard(this.listShips);
         this.setTotalPoints();
-
     }
 
     getTotalPoints() {
@@ -33,6 +33,26 @@ export default class Player {
     discountPoint() {
         this.totalPoints--;
     }
+    // setCornerPtos(list) {
+    //     this.#listCornerPoints.push(...list)
+    // }
+    // getCornerPoints() {
+    //     return this.#listCornerPoints;
+    // }
+
+    setLastGoodPositionsOfAtk(points) {
+        this.#lastGoodPositionsOfAtk.push(...points)
+    }
+    getLastGooPositionOfAtk() {
+        return this.#lastGoodPositionsOfAtk
+    }
+    removeAgoodPosition(elm) {
+        // this.#lastGoodPositionsOfAtk.shift()
+        let index = this.#lastGoodPositionsOfAtk.indexOf(elm);
+        this.#lastGoodPositionsOfAtk.splice(index, 1)
+
+    }
+
 
     setModeGame(md) {
         switch (md) {
@@ -49,11 +69,19 @@ export default class Player {
     }
 
     // fill the array with the ships of random size (1 and 5)
-    setShips() {
-        for (let i = 0; i < this.numbOfShips; i++) {
-            this.listShips.push(new Ship())
+    // or whith the specifc list
+    setShips(listSizeShips) {
+        if (listSizeShips == undefined) {
+            for (let i = 0; i < this.numbOfShips; i++) {
+                this.listShips.push(new Ship())
+            }
+        } else {
+            for (const item of listSizeShips) {
+                this.listShips.push(new Ship(item))
+            }
         }
     }
+
 
     identifyShip(num) {
         let intNum = parseInt(num)
@@ -67,14 +95,14 @@ export default class Player {
 
     getMapPointAttk(pto = 100) {
         if (pto == 100) {
-            return this.#mapPointAttk
+            return this.#mapPointsOfAttacked
         } else {
-            return this.#mapPointAttk[pto];
+            return this.#mapPointsOfAttacked[pto];
         }
     }
 
     setMapPointsAttk(pto) {
-        this.#mapPointAttk[pto] = true;
+        this.#mapPointsOfAttacked[pto] = true;
     }
 }
 // export { Player };

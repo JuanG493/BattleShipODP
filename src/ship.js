@@ -5,15 +5,9 @@ class Ship {
     #type;
     #positions = [];
 
-    constructor(lenght = this.#setLenghtNewShip()) {
-        if (lenght >= 1 && lenght <= 5) {
-            this.#lenghtShip = lenght;
-            // do I need this ?
-        } else {
-            this.#lenghtShip = this.#setLenghtNewShip();
-        }
+    constructor(lenght = this.#randomLength()) {
+        this.#lenghtShip = lenght;
         this.#setType();
-
     }
 
     getHitsRecived() {
@@ -30,7 +24,7 @@ class Ship {
         return this.#type;
     }
 
-    #setLenghtNewShip() {
+    #randomLength() {
         const MIN = 1;
         const MAX = 5;
         return Math.floor(Math.random() * (MAX - MIN + 1) + MIN);

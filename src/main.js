@@ -1,6 +1,8 @@
 import Player from "./player.js";
+// import content from "./mainContent.js";
 
-
+let container = document.querySelector("#container");
+// container.innerHTML = `${content}`;
 
 let positionBoard = document.querySelector("#board_pst");
 let pstY = document.querySelector(".pst_ind_left");
@@ -15,53 +17,115 @@ let leftPtsPj2 = document.querySelector("#leftPts_pj2")
 
 
 let btnMakeArmy = document.querySelector("#mk_army")
+let btnRandom = document.querySelector("#rand")
+let btnRestar = document.querySelector("#restar")
 let displayTurn = document.querySelector("#display_turn")
+let btnPlay = document.querySelector("#play")
 
-// let mode = document.querySelector("#mode");
 
 let player = null;
 let oponent = null;
 
+// btnPlay.addEventListener("click", () => {
+
+// })
+
+// btnRandom.addEventListener("click", () => {
+
+// })
+
+
+btnRestar.addEventListener("click", () => {
+
+    player = null;
+    oponent = null;
+
+    positionBoard.innerHTML = "";
+    attackBoard.innerHTML = "";
+    pstX.innerHTML = "";
+    pstY.innerHTML = "";
+    atkX.innerHTML = "";
+    atkY.innerHTML = "";
+    player = null;
+    oponent = null;
+
+    leftPtsPj1.innerText = "";
+    leftPtsPj2.innerText = "";
+    displayTurn.innerHTML = "";
+
+    disabledHtmlBtn(btnMakeArmy, false);
+    btnMakeArmy.removeEventListener("click", handleMakeArmy, true)
+
+    started();
+
+})
+
+
 function started() {
     drawBasicBoard(positionBoard, pstY, pstX)
     drawBasicBoard(attackBoard, atkY, atkX)
-    let mode;
-    let selectOponent;
-
     //button make army create the player and their ships
-    btnMakeArmy.addEventListener("click", () => {
+    btnMakeArmy.addEventListener("click", handleMakeArmy)
 
-        //select the game mode
-        let radiosBtns = document.querySelectorAll(".md");
-        radiosBtns.forEach(element => {
-            if (element.checked) {
-                mode = element.value;
-            }
-        });
-
-        //select the oponent
-        let tempOponent = document.querySelectorAll(".opp");
-        selectOponent = tempOponent[0].checked ? "maquina" : "friend";
-
-
-        if (selectOponent == "maquina") {
-            oponent = new Player(mode);
-            // console.log(oponent);
-
-        }
-        //create the player with a mode
-        player = new Player(mode);
-        positionShipsOn(player)
-
-        turns(player, oponent, true)
-    })
 }
 
 started()
 
+function handleMakeArmy() {
+    let mode;
+    let selectOponent;
+    let listSizeShipsOponent;
+    //select the game mode
+    let radiosBtns = document.querySelectorAll(".md");
+    radiosBtns.forEach(element => {
+        if (element.checked) {
+            mode = element.value;
+        }
+    });
+
+    //select the oponent
+    let tempOponent = document.querySelectorAll(".opp");
+    selectOponent = tempOponent[0].checked ? "machine" : "friend";
+
+
+    if (selectOponent == "machine") {
+        oponent = new Player(mode);
+        listSizeShipsOponent = filterSizesShips(oponent)
+
+    }
+
+    //create the player with a mode
+    player = new Player(mode, listSizeShipsOponent);
+
+    positionShipsOn(player)
+
+    turns(player, oponent, true);
+
+}
+
+function disabledHtmlBtn(btn, toggle) {
+    btn.disabled = toggle;
+    btnMakeArmy.disabled = toggle;
+
+
+}
+//for boths players have the same lenght of ships
+function filterSizesShips(pJ) {
+    let sizeShips = [];
+    pJ.listShips.forEach(element => {
+        sizeShips.push(element.getSizeShip());
+    });
+    return sizeShips;
+}
+
+
+
+
 //set the flow of the game, turn is a boolean to know who is playing
 //true -> player || false -> machine
 async function turns(pjCurrentTurn, pjTarget, turn) {
+    // btnMakeArmy.disabled = true;
+    disabledHtmlBtn(btnMakeArmy, true);
     drawRemainPoints()
     console.log(pjTarget);
     if (turn) {
@@ -100,16 +164,22 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
             }, { once: true })
 
         } else {
-            let played = await playMachine(pjCurrentTurn, pjTarget);
+            await playMachine(pjCurrentTurn, pjTarget);
             turns(pjTarget, pjCurrentTurn, true)
         }
 
     } else {
-        console.log("game Over");
-        //call function game over
+        gameOver();
     }
 
 }
+function gameOver() {
+    console.log("game Over");
+    let winner = leftPtsPj1 == 0 ? "MACHINE" : "HUMAN";
+    displayTurn.innerText = winner, "Win";
+    disabledHtmlBtn(btnMakeArmy, false)
+}
+
 function drawRemainPoints() {
     leftPtsPj1.innerText = `${player.totalPoints}`
     leftPtsPj2.innerText = `${oponent.totalPoints}`
@@ -118,7 +188,7 @@ function drawRemainPoints() {
 function drawPointOfAttack(board, point) {
     if (point != null) {
         let div = board.querySelector(`div[value="${point}"]`)
-        div.innerHTML = "<img src='/src/images/redPoint.png'>"
+        div.innerHTML = "<img src='/src/images/diana.png'>"
         div.classList.add("hit");
     }
 }
@@ -126,20 +196,31 @@ function drawPointOfAttack(board, point) {
 async function playMachine(machineBoard, humanBoard) {
     let point;
     let wasHIt;
+    let partialpoint
     do {
         //serch for a point around the last hit
-        //it is think that work afeter ther second iteration
-        if (wasHIt) {
-            let around = serchNerbyPto(point, machineBoard.getMapPointAttk());
+        //it is think that work after ther second iteration
+        let prevElemts = machineBoard.getLastGooPositionOfAtk();
+        if (wasHIt || prevElemts[0] != undefined) {
+            //while still good position take those
+            if (prevElemts.length > 0) {
+                partialpoint = machineBoard.board.getRandomInt(0, prevElemts.length - 1)
+                point = prevElemts[partialpoint];
+                machineBoard.removeAgoodPosition(point);
+            } else {
+                //surch for a good positions
+                let around = serchNerbyPto(point, machineBoard.getMapPointAttk(), machineBoard);
+                partialpoint = machineBoard.board.getRandomInt(0, around.length - 1)
+                point = around[partialpoint]
+                machineBoard.removeAgoodPosition(point);
 
-            let partialpoint = machineBoard.board.getRandomInt(1, around.length)
-            point = around[partialpoint]
+            }
 
 
         } else {
             do {
                 point = machineBoard.board.getRandomInt();
-
+                // prevent to select a point that alredy was selectec - is a hash map
             } while (machineBoard.getMapPointAttk(point));
 
         }
@@ -152,13 +233,28 @@ async function playMachine(machineBoard, humanBoard) {
         wasHIt = await checkHit(point, machineBoard, humanBoard)
         if (wasHIt) {
             navHit(div)
+            quitOusidePoints(point, machineBoard);
+            //adding the new good point to the list of good points
+            serchNerbyPto(point, machineBoard.getMapPointAttk(), machineBoard);
         }
+        //save the point that was selected
         machineBoard.setMapPointsAttk(point)
+        //clean the remain options for a point
+        cleanGoodPositions(machineBoard, machineBoard.getLastGooPositionOfAtk())
 
     } while (wasHIt);
 
 
 }
+
+function cleanGoodPositions(machineBoard, listPositiones) {
+    for (const position of listPositiones) {
+        if (machineBoard.getMapPointAttk(position)) {
+            machineBoard.removeAgoodPosition(position)
+        }
+    }
+}
+
 function timeOut(ms = 2000) {
     return new Promise(resolve => setTimeout(resolve, ms))
 
@@ -238,16 +334,39 @@ function drawBasicBoard(targetBoard, y, x) {
     }
 
 }
+//return a list of valid points around a point and add to board those elemnts
+function serchNerbyPto(pointStr, listPtosAttaked, machineBoard) {
 
-function serchNerbyPto(pointStr, listSelectdPtos) {
+
+    let partialPerimeter = []
+    //all the 8 points around
+    let pointsAround = [
+        pointStr - 1,
+        pointStr + 1,
+        pointStr - 10,
+        pointStr + 10,
+    ]
+
+    let topesList = topes(pointStr)
+    pointsAround.forEach(element => {
+
+        if (listPtosAttaked[element] == undefined && !(topesList.includes(element))) {
+            partialPerimeter.push(element)
+        }
+    });
+
+    // machineBoard.setCornerPtos(cornersPoints)
+    machineBoard.setLastGoodPositionsOfAtk(partialPerimeter);
+    return partialPerimeter
+
+
+}
+
+function topes(pointStr) {
     let baseRow = Math.floor(pointStr / 10);
     let baseCol = pointStr % 10
 
-    let partialPerimeter = []
     let topes = []
-    // let total = 8;
-
-    // if the point is at the end of the columns still be a valid position  
     if (baseCol == 9) {
         topes.push(...[pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1])
         // if the point is at the begining of the columns
@@ -259,32 +378,28 @@ function serchNerbyPto(pointStr, listSelectdPtos) {
         topes.push(...[pointStr + 10, (pointStr + 10) - 1, (pointStr + 10) + 1])
     }
 
-    //all the 8 points around
-    let pointsAround = [
-        pointStr - 1,
-        pointStr + 1,
-        pointStr - 10,
-        pointStr + 10,
-        // (pointStr - 1) + 10,
-        // (pointStr - 1) - 10,
-        // (pointStr + 1) + 10,
-        // (pointStr + 1) - 10
-    ]
-    pointsAround.forEach(element => {
-        // //check if it is a valid even if it is out of the board
-        // if (topes.includes(element)) {
-        //     total--;
-        //     //chenge for thee actual points selected ----------------------------------
-        // } 
-        if (listSelectdPtos[element] == undefined) {
-            partialPerimeter.push(element)
-            // total--;
-        }
-    });
-    return partialPerimeter
-
+    return topes
 
 }
 
+function quitOusidePoints(pointStr, machineBoard) {
+    let topesList = topes(pointStr)
+    let discountPoints = [
+        (pointStr - 1) + 10,
+        (pointStr - 1) - 10,
+        (pointStr + 1) + 10,
+        (pointStr + 1) - 10
+    ]
+
+    for (const pto of discountPoints) {
+        if (!topesList.includes(pto)) {
+            machineBoard.setMapPointsAttk(pto)
+            // cornersPoints.push(iter)
+        }
+
+    }
+    // machineBoard.setCornerPtos(cornersPoints)
+    // machineBoard.setLastGoodPositionsOfAtk(partialPerimeter);
+}
 
 
