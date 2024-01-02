@@ -1,0 +1,138 @@
+* {
+    box-sizing: border-box;
+}
+
+#container {
+    display: grid;
+    grid-template-columns: 3fr 1fr 3fr;
+    justify-content: space-around;
+    text-align: center;
+    text-transform: uppercase;
+    /* justify-content: center; */
+    align-items: center;
+    justify-items: center;
+
+}
+
+
+
+#board_pst,
+#board_atk {
+    border: 1px solid black;
+    /* border-collapse: collapse; */
+    /* width: 500px; */
+    /* height: 500px; */
+
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
+    flex-wrap: wrap;
+    /* grid-gap:10px; */
+    /* width: 100%;
+    height: 100%; */
+}
+
+#board_pst div,
+#board_atk div {
+    /* width: 50px; */
+    width: 100%;
+    /* height: 50px; */
+    border: 1px solid black;
+    margin: 0 -10px 0 0;
+    /* background-color: blueviolet; */
+}
+
+.ship {
+    background-color: yellow;
+    border-radius: 5px;
+    /* border: 2px solid red; */
+    /* box-shadow:0 0 0 10px palegreen;  */
+
+}
+
+.all_board {
+    display: flex;
+}
+
+.pst_ind_right,
+.atk_ind_right {
+    display: flex;
+    /* width: 400px; */
+    text-align: center;
+    /* text-transform: uppercase; */
+}
+
+.pst_ind_right div,
+.atk_ind_right div {
+    width: 100%;
+}
+
+.pst_ind_left,
+.atk_ind_left {
+    display: flex;
+    flex-direction: column;
+    /* height: 400px; */
+    margin-top: 4%;
+    margin-right: 5px;
+    /* justify-content: center; */
+    align-content: center;
+
+}
+
+.pst_ind_left div,
+.atk_ind_left div {
+    width: 100%;
+    height: 100%;
+    /* justify-content: 100px; */
+    /* padding-top: 10px; */
+}
+
+.square {
+    border: 1px solid rebeccapurple;
+    width: 12.5%;
+    height: 12.5%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 2s;
+}
+
+.hit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    font-size: xx-large;
+    margin: 0;
+    /* background-image: url(images/redPoint.png); */
+    image-resolution: 10px 10px;
+    /* background-color: red; */
+}
+
+.nav_hit {
+    background-color: rgba(255, 0, 0, 0.39);
+    /* border: 1px solid red; */
+}
+
+img {
+    width: 40px;
+    height: 40px;
+}
+
+#display_turn {
+    width: 100px;
+    height: 100px;
+    /* background-color: red; */
+    font-weight: bold;
+
+}
+
+button:disabled {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+}
