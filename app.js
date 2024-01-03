@@ -28,21 +28,30 @@
 
 // console.log("server")
 
-
+// src/server/app.js
 import express from 'express';
-import { createServer } from 'node:http';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { createServer } from 'http';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 const app = express();
 const server = createServer(app);
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Serve static files from the 'public' directory
+app.use(express.static(join(__dirname, 'public')));
+
+// Allow access to files inside the 'dist' directory
+app.use('/dist', express.static(join(__dirname, 'dist')));
 
 app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, 'index.html'));
+    res.sendFile(join(__dirname, 'public/index.html'));
 });
 
 server.listen(3000, () => {
-    console.log('server running at http://localhost:3000');
+    console.log('Server running at http://localhost:3000');
 });
+
+
