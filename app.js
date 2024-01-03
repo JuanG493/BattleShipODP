@@ -1,41 +1,13 @@
-
-// const express = require('express')
-// const app = express()
-
-// const http = require('http')
-// const server = http.createServer(app)
-// const { Server } = require("socket.io");
-// // const io = new Server(server)
-// // const { Server } = require('socket.io');
-// const io = new Server(server);
-
-// const port = 8080
-
-// app.use(express.static('src'))
-
-// app.get('/', (req, res) => {
-//     res.send('Hello World!')
-//     res.sendFile(__dirname + '/index.html')
-// })
-
-// io.on('connection', (socket) => {
-//     console.log('a user connected');
-// });
-
-// app.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`)
-// })
-
-// console.log("server")
-
-// src/server/app.js
+import { Rooms } from './public/js/Room.js';
 import express from 'express';
 import { createServer } from 'http';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { Server } from 'socket.io';
 
 const app = express();
 const server = createServer(app);
+const io = new Server(server);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,6 +21,42 @@ app.use('/dist', express.static(join(__dirname, 'dist')));
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'public/index.html'));
 });
+
+const players = []
+const ListRooms = []
+let idRoom = 0;
+let roomName = "roomOne"
+
+function handleRoom(socket) {
+    console.log(socket);
+}
+
+
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    players.push(socket.id)
+
+
+
+
+    socket.on('createRoom', () => {
+
+        socket.join(`${roomName}`);
+        console.log(`Socket ${socket.id} joined room: ${roomName}`);
+    });
+
+    socket.on('sendMessage', (roomName, message) => {
+        console.log(message);
+        io.to(roomName).emit('message', message);
+    });
+    // socket.on("connect_error", (err) => {
+    //     console.log(`connect_error due to ${err.message}`);
+    // });
+});
+
+// socket.on('createRoom', roomName)
+
 
 server.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
