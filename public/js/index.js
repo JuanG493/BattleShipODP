@@ -1,7 +1,12 @@
 // import Player from "./player.js";
+// main.js
+import './style.css';
 import Player from './player.js';
 
-const socket = io();
+// Your other JavaScript code
+
+
+// const socket = io();
 // import content from "./mainContent.js";
 
 let container = document.querySelector("#container");
@@ -192,7 +197,7 @@ function drawPointOfAttack(board, point) {
     if (point != null) {
         let div = board.querySelector(`div[value="${point}"]`)
         div.innerText = "X"
-        div.innerHTML = "<img src='./src/images/diana.png'>"
+        div.innerHTML = "<img src='./images/diana.png'>"
         div.classList.add("hit");
     }
 }
