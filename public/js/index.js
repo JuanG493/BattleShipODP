@@ -3,11 +3,7 @@
 import './style.css';
 import Player from './player.js';
 
-// Your other JavaScript code
 
-
-// const socket = io();
-// import content from "./mainContent.js";
 
 let container = document.querySelector("#container");
 // container.innerHTML = `${content}`;
@@ -79,6 +75,8 @@ function started() {
 
 started()
 
+
+
 function handleMakeArmy() {
     let mode;
     let selectOponent;
@@ -100,14 +98,17 @@ function handleMakeArmy() {
         oponent = new Player(mode);
         listSizeShipsOponent = filterSizesShips(oponent)
 
+        //create the player with a mode
+        player = new Player(mode, listSizeShipsOponent);
+
+        positionShipsOn(player)
+
+        turns(player, oponent, true);
+    } else {
+        createRomm()
+
     }
 
-    //create the player with a mode
-    player = new Player(mode, listSizeShipsOponent);
-
-    positionShipsOn(player)
-
-    turns(player, oponent, true);
 
 }
 
@@ -412,3 +413,39 @@ function quitOusidePoints(pointStr, machineBoard) {
 }
 
 
+
+
+// Your other JavaScript code
+
+
+const socket = io();
+
+
+socket.on('updatePlayers', (players) => { // escucha por el evento
+    console.log("estos son los jugadores", players);
+
+    socket.emit("hello", "world", (response) => {
+        console.log(response); // "got it"
+    });
+
+})
+
+let rooms = [];
+function createRomm() {
+
+
+    // console.log("creando a room");
+    socket.emit('createRoom');
+    // const roomName = prompt('Enter room name:');
+    const message = prompt('Enter message:');
+    if (message) {
+        socket.emit('sendMessage', "roomOne", message);
+    }
+
+
+}
+
+
+socket.on('message', (message) => {
+    console.log('Received message:', message);
+});
