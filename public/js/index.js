@@ -3,6 +3,8 @@
 import './style.css';
 import Player from './player.js';
 
+const socket = io(); // aqui va el dominio
+
 
 
 let container = document.querySelector("#container");
@@ -20,30 +22,104 @@ let leftPtsPj1 = document.querySelector("#leftPts_pj1")
 let leftPtsPj2 = document.querySelector("#leftPts_pj2")
 
 
-let btnMakeArmy = document.querySelector("#mk_army")
+let btnMakeArmy = document.querySelector("#make_army")
 let btnRandom = document.querySelector("#rand")
 let btnRestar = document.querySelector("#restar")
 let displayTurn = document.querySelector("#display_turn")
 let btnPlay = document.querySelector("#play")
 
+let btnJoinGame = document.querySelector("#join_game")
+// let btnNewGame = document.querySelector("#make_game")
+let btnVsMachine = document.querySelector("#vs_machine")
+let btnVsFriend = document.querySelector("#vs_friend")
+// let selectOponent = document.querySelector(".selected")
+let btnLeave = document.querySelector("#leave")
 
 let player = null;
 let oponent = null;
+let vs = null;
+let namePartida;
 
-// btnPlay.addEventListener("click", () => {
+function toggle(elemnt) {
+    elemnt.classList.toggle("selected")
+}
 
-// })
+btnJoinGame.addEventListener("click", () => {
+    namePartida = prompt("Enter the name of the game")
+    socket.emit('joinRoom', namePartida, (response) => {
+        if (response) {
+            console.log("join to the camp");
+            player = new Player(gameModeSelected())
+            positionShipsOn(player)
+            oponent = "friend"
 
-// btnRandom.addEventListener("click", () => {
+            toggle(btnRandom)
+            toggle(btnRestar)
+            turns(player, oponent, true);
+        }
+        // console.log("unido exitosamente")
+    })
 
-// })
+})
+// -hacer los turnos un display que muestre de quien es el turno
+// --provar si no funciona esta a devolver la id del primero y jugar con estas
+
+btnVsMachine.addEventListener("click", () => {
+    vs = "machine"
+    // toggle(btnVsFriend)
+    disabledHtmlBtn(btnVsMachine, true)
+    disabledHtmlBtn(btnVsFriend, false)
+})
+
+btnVsFriend.addEventListener("click", () => {
+    vs = "friend"
+    // toggle(selectOponent)
+    disabledHtmlBtn(btnVsFriend, true)
+    disabledHtmlBtn(btnVsMachine, false)
+})
 
 
-btnRestar.addEventListener("click", () => {
+btnRandom.addEventListener("click", () => {
+    cleanArea()
+    started()
+    console.log(mode);
+    player = new Player(gameModeSelected());
+    positionShipsOn(player)
 
+})
+
+btnMakeArmy.addEventListener("click", () => {
+    // disabledHtmlBtn(btnRandom, false)
+    disabledHtmlBtn(btnMakeArmy, true)
+    toggle(btnRandom)
+    // toggle(btnRestar)
+    disabledHtmlBtn(btnPlay, false)
+    player = new Player(gameModeSelected());
+    positionShipsOn(player)
+    disabledHtmlBtn(btnRandom, false)
+})
+
+btnPlay.addEventListener("click", () => {
+    //select the game mode
+    // let mode = gameModeSelected()
+    if (vs == undefined) {
+        alert("Please select a oponent firs")
+    } else if (vs == "machine") {
+        oponent = new Player(gameModeSelected());
+        toggle(btnRandom)
+        toggle(btnRestar)
+        turns(player, oponent, true);
+    } else {
+        multiplayer()
+        toggle(btnRandom)
+        toggle(btnRestar)
+    }
+
+})
+
+function cleanArea() {
     player = null;
     oponent = null;
-
     positionBoard.innerHTML = "";
     attackBoard.innerHTML = "";
     pstX.innerHTML = "";
@@ -52,89 +128,74 @@ btnRestar.addEventListener("click", () => {
     atkY.innerHTML = "";
     player = null;
     oponent = null;
-
     leftPtsPj1.innerText = "";
     leftPtsPj2.innerText = "";
     displayTurn.innerHTML = "";
+}
 
-    disabledHtmlBtn(btnMakeArmy, false);
-    btnMakeArmy.removeEventListener("click", handleMakeArmy, true)
 
+btnRestar.addEventListener("click", () => {
+    cleanArea()
+    disableMainPanel();
     started();
+    // toggle(btnRandom)
+    toggle(btnRestar)
 
 })
+
+function disableMainPanel() {
+    disabledHtmlBtn(btnRandom, true);
+    disabledHtmlBtn(btnPlay, true);
+    disabledHtmlBtn(btnJoinGame, true);
+    disabledHtmlBtn(btnMakeArmy, false)
+    disabledHtmlBtn(btnJoinGame, false)
+
+}
 
 
 function started() {
     drawBasicBoard(positionBoard, pstY, pstX)
     drawBasicBoard(attackBoard, atkY, atkX)
-    //button make army create the player and their ships
-    btnMakeArmy.addEventListener("click", handleMakeArmy)
-
 }
 
 started()
 
+btnLeave.addEventListener("click", () => {
+    cleanArea()
+    disableMainPanel()
+    toggle(btnLeave)
+    started()
+    // toggle(re)
+})
 
-
-function handleMakeArmy() {
+function gameModeSelected() {
     let mode;
-    let selectOponent;
-    let listSizeShipsOponent;
-    //select the game mode
     let radiosBtns = document.querySelectorAll(".md");
     radiosBtns.forEach(element => {
         if (element.checked) {
             mode = element.value;
         }
     });
-
-    //select the oponent
-    let tempOponent = document.querySelectorAll(".opp");
-    selectOponent = tempOponent[0].checked ? "machine" : "friend";
-
-
-    if (selectOponent == "machine") {
-        oponent = new Player(mode);
-        listSizeShipsOponent = filterSizesShips(oponent)
-
-        //create the player with a mode
-        player = new Player(mode, listSizeShipsOponent);
-
-        positionShipsOn(player)
-
-        turns(player, oponent, true);
-    } else {
-        createRomm()
-
-    }
-
-
+    return mode;
 }
+
 
 function disabledHtmlBtn(btn, toggle) {
     btn.disabled = toggle;
-    btnMakeArmy.disabled = toggle;
-
-
+    // btnMakeArmy.disabled = toggle;
 }
-//for boths players have the same lenght of ships
-function filterSizesShips(pJ) {
-    let sizeShips = [];
-    pJ.listShips.forEach(element => {
-        sizeShips.push(element.getSizeShip());
-    });
-    return sizeShips;
-}
-
-
-
 
 //set the flow of the game, turn is a boolean to know who is playing
 //true -> player || false -> machine
 async function turns(pjCurrentTurn, pjTarget, turn) {
+
     // btnMakeArmy.disabled = true;
-    disabledHtmlBtn(btnMakeArmy, true);
+    toggle(btnLeave)
+    disabledHtmlBtn(btnRandom, true);
+    disabledHtmlBtn(btnPlay, true);
+    disabledHtmlBtn(btnJoinGame, true);
+
+    // disabledHtmlBtn(btnNewGame, true);
     drawRemainPoints()
     console.log(pjTarget);
     if (turn) {
@@ -408,17 +469,20 @@ function quitOusidePoints(pointStr, machineBoard) {
         }
 
     }
-    // machineBoard.setCornerPtos(cornersPoints)
-    // machineBoard.setLastGoodPositionsOfAtk(partialPerimeter);
 }
 
 
 
 
-// Your other JavaScript code
 
 
-const socket = io();
+
+
+
+
+
+
+
 
 
 socket.on('updatePlayers', (players) => { // escucha por el evento
@@ -431,21 +495,30 @@ socket.on('updatePlayers', (players) => { // escucha por el evento
 })
 
 let rooms = [];
-function createRomm() {
+function multiplayer() {
 
 
-    // console.log("creando a room");
-    socket.emit('createRoom');
-    // const roomName = prompt('Enter room name:');
-    const message = prompt('Enter message:');
-    if (message) {
-        socket.emit('sendMessage', "roomOne", message);
-    }
+    let nameGame = prompt("Name of the BATTLE FIELD: ")
+    socket.emit('createRoom', nameGame);
+
+
+    // player = new Player(gameModeSelected());
+    // positionShipsOn(player)
+    // oponent = "friend"
+
+
 
 
 }
+socket.on('readyToPlay', () => {
+    console.log("listo para jugar");
+
+})
 
 
-socket.on('message', (message) => {
-    console.log('Received message:', message);
-});
+
+
+//recibe
+// socket.on('message', (message) => {
+//     console.log('Received message:', message);
+// });

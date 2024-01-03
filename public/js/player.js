@@ -14,9 +14,9 @@ export default class Player {
     #lastGoodPositionsOfAtk = [];
     // #randomSizes = [];
 
-    constructor(mode, listSizeShips) {
+    constructor(mode) {
         this.setModeGame(mode);
-        this.setShips(listSizeShips);
+        this.setShips();
         this.board = new GameBoard(this.listShips);
         this.setTotalPoints();
     }
@@ -70,15 +70,11 @@ export default class Player {
 
     // fill the array with the ships of random size (1 and 5)
     // or whith the specifc list
-    setShips(listSizeShips) {
-        if (listSizeShips == undefined) {
-            for (let i = 0; i < this.numbOfShips; i++) {
-                this.listShips.push(new Ship())
-            }
-        } else {
-            for (const item of listSizeShips) {
-                this.listShips.push(new Ship(item))
-            }
+    setShips() {
+        let listSizeShips = [1, 2, 3, 4, 5, 2, 3]
+
+        for (let i = 0; i < this.numbOfShips; i++) {
+            this.listShips.push(new Ship(listSizeShips[i]))
         }
     }
 

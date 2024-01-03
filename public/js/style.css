@@ -136,3 +136,12 @@ button:disabled {
     background-color: #cccccc;
     color: #666666;
 }
+
+.selected {
+    display: none;
+}
+
+#target_opt {
+    text-align: center;
+    justify-items: center;
+}
