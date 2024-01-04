@@ -145,3 +145,8 @@ button:disabled {
     text-align: center;
     justify-items: center;
 }
+
+#state {
+    font-size: x-large;
+
+}

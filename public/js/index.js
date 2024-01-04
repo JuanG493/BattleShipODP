@@ -2,12 +2,13 @@
 // main.js
 import './style.css';
 import Player from './player.js';
+// import { response } from 'express';
 
 const socket = io(); // aqui va el dominio
 
 
 
-let container = document.querySelector("#container");
+// let container = document.querySelector("#container");
 // container.innerHTML = `${content}`;
 
 let positionBoard = document.querySelector("#board_pst");
@@ -31,89 +32,264 @@ let btnPlay = document.querySelector("#play")
 let btnJoinGame = document.querySelector("#join_game")
 // let btnNewGame = document.querySelector("#make_game")
 let btnVsMachine = document.querySelector("#vs_machine")
-let btnVsFriend = document.querySelector("#vs_friend")
+let btnCreateGame = document.querySelector("#vs_friend")
 // let selectOponent = document.querySelector(".selected")
 let btnLeave = document.querySelector("#leave")
+let state = document.querySelector("#state");
 
 let player = null;
 let oponent = null;
-let vs = null;
-let namePartida;
+let oponentSelected = null;
+let nameGameRoom;
+let idPlayer = null;
+// let playing = null;
+// let joinedTogame = false;
+
+
+socket.on('id', (id) => {
+    idPlayer = id;
+    console.log(idPlayer);
+})
+
+function handleCreateRoom() {
+    let nameGame = prompt("Name of the BATTLE FIELD: ")
+    // console.log(player.totalPoints);
+    // socket.emit('createRoom', nameGame)
+    socket.emit(
+        'createRoom', nameGame, idPlayer,
+        {
+            coordinates: player.board.listCoordinates,
+            totalPoints: player.totalPoints
+        })
+    nameGameRoom = nameGame;
+}
+async function handleJointToGame() {
+    let roomName = prompt("Enter the name of the game")
+    if (roomName != null) {
+        socket.emit('joinRoom', roomName, idPlayer, (response) => {
+            if (response) {
+                console.log(`sucess join to ${roomName}`);
+                nameGameRoom = roomName
+                oponent = response;
+
+                console.log("mi id:", idPlayer, "oponent id : ", oponent);
+                // console.log("I have the id of my op:", oponent);
+                return
+            }
+            else {
+                alert(`The game <${roomName}> do not exist`)
+                handleJointToGame()
+            }
+        })
+
+    } else {
+        location.replace(location.href);
+    }
+    return
+}
+
+
+async function readyToStart() {
+    // console.log("handle turns");
+    // console.log("player from turns: ", player.board.listCoordinates);
+    socket.emit('turns', nameGameRoom, {
+        coordinates: player.board.listCoordinates,
+        totalPoints: player.totalPoints
+    })
+}
+
+socket.on('readyToPlay', (cb) => {
+    state.innerText = "a contenden has joined to this game"
+    oponent = cb;
+    displayTurn.innerText = "Your TURN"
+
+    console.log("mi id:", idPlayer, "oponent id : ", oponent);
+
+    modifyTurns(player, true)
+    // socket.emit('startGame')
+
+    // console.log("boar oponente: ", boarOponent);
+})
+
+socket.on('checkThisPto', (pto) => {
+    let check = player.board.listCoordinates[pto];
+    socket.emit('chekeated', idPlayer, check)
+
+    // callback(player.board.listCoordinates[pto]);
+    // if (player.board.listCoordinates[pto] == true) {
+    //     cb = true
+    // } else {
+    //     cb = false;
+    // }
+
+    // checkHit
+    //comprobar si fue jit
+})
+
+
+async function modifyTurns(pjCurrentTurn, turn) {
+    // console.log("playing globla: ", playing);
+    // if (playing) {
+
+    // drawRemainPoints() // do not work for the moment need the second player
+
+    displayTurn.innerText = "your Turn"
+
+
+    //check if it´s posible play
+    if (pjCurrentTurn.totalPoints > 0) {
+
+        if (turn) {
+            attackBoard.addEventListener("click", async e => {
+                let divTarget = e.target
+                // console.log("target waas : ", divTarget);
+
+                // mark in the map
+                // divTarget.classList.add("hit")
+                let pointTarget = divTarget.attributes[0].nodeValue;
+
+                drawPointOfAttack(attackBoard, pointTarget)
+
+                // let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
+                let wasHit;
+                // console.log(oponent);
+                socket.emit('checkPointAtack', oponent, pointTarget)
+                await socket.on('chekeated', (hit) => {
+                    wasHit = hit
+                    console.log("ksadjflkas", hit);
+                })
+
+
+                // console.log("was hit :", wasHit);
+                // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
+
+                // if (wasHit) {
+                //     navHit(divTarget)
+                //     //the actual PJ continue with the turn
+                //     turns(pjCurrentTurn, pjTarget, true)
+                // } else {
+                //     turns(pjTarget, pjCurrentTurn, false)
+                // }
+                // } else {
+                //     console.log("game Over");
+                //     //call function game over
+                // }
+            }, { once: true })
+
+        } else {
+            await playMachine(pjCurrentTurn, pjTarget);
+            turns(pjTarget, pjCurrentTurn, true)
+        }
+
+    } else {
+        console.log("game Over");
+        // gameOver();
+    }
+}
+
+
+
 
 function toggle(elemnt) {
     elemnt.classList.toggle("selected")
 }
 
 btnJoinGame.addEventListener("click", () => {
-    namePartida = prompt("Enter the name of the game")
-    socket.emit('joinRoom', namePartida, (response) => {
-        if (response) {
-            console.log("join to the camp");
-            player = new Player(gameModeSelected())
-            positionShipsOn(player)
-            oponent = "friend"
-
-            toggle(btnRandom)
-            toggle(btnRestar)
-            turns(player, oponent, true);
-        }
-        // console.log("unido exitosamente")
-    })
-
+    oponentSelected = "join"
+    disbleHeaderOponents(btnJoinGame)
 })
-// -hacer los turnos un display que muestre de quien es el turno
-// --provar si no funciona esta a devolver la id del primero y jugar con estas
 
 btnVsMachine.addEventListener("click", () => {
-    vs = "machine"
+    oponentSelected = "machine"
     // toggle(btnVsFriend)
-    disabledHtmlBtn(btnVsMachine, true)
-    disabledHtmlBtn(btnVsFriend, false)
+    disbleHeaderOponents(btnVsMachine)
 })
 
-btnVsFriend.addEventListener("click", () => {
-    vs = "friend"
-    // toggle(selectOponent)
-    disabledHtmlBtn(btnVsFriend, true)
-    disabledHtmlBtn(btnVsMachine, false)
+btnCreateGame.addEventListener("click", () => {
+    oponentSelected = "create"
+    disbleHeaderOponents(btnCreateGame)
 })
 
+function disbleHeaderOponents(target) {
+    let buttons = [btnVsMachine, btnCreateGame, btnJoinGame]
+    for (const btn of buttons) {
+        if (btn === target) {
+            target.disabled = true
+        } else {
+            btn.disabled = false
+        }
+    }
+}
 
 btnRandom.addEventListener("click", () => {
     cleanArea()
     started()
-    console.log(mode);
+    // console.log(mode);
     player = new Player(gameModeSelected());
+    console.log(player);
+    // oponent = new Player(gameModeSelected())
     positionShipsOn(player)
 
 })
 
 btnMakeArmy.addEventListener("click", () => {
-    // disabledHtmlBtn(btnRandom, false)
-    disabledHtmlBtn(btnMakeArmy, true)
-    toggle(btnRandom)
-    // toggle(btnRestar)
-    disabledHtmlBtn(btnPlay, false)
-    player = new Player(gameModeSelected());
-    positionShipsOn(player)
-    disabledHtmlBtn(btnRandom, false)
+
+    if (oponentSelected == null) {
+        alert("Please select a oponent first")
+
+    } else {
+        // disabledHtmlBtn(btnRandom, false)
+        disabledHtmlBtn(btnMakeArmy, true)
+        disabledHtmlBtn(btnPlay, false)
+        toggle(btnRandom)
+        // toggle(btnRestar)
+        toggle(btnRestar)
+        // toggle(btnRestar)
+
+        player = new Player(gameModeSelected());
+        console.log(player);
+        positionShipsOn(player)
+        // disabledHtmlBtn(btnRandom, false)
+
+        if (oponentSelected === "create") {
+            // console.log("friend");
+            handleCreateRoom()
+
+        } else if (oponentSelected == "machine") {
+            // console.log("machine");
+            oponent = new Player(gameModeSelected());
+
+        } else if (oponentSelected === "join") {
+            handleJointToGame()
+            toggle(btnLeave, true)
+
+        }
+    }
 })
 
-btnPlay.addEventListener("click", () => {
+btnPlay.addEventListener("click", async () => {
+    // playing = true;
+    disabledHtmlBtn(btnPlay, true)
+    disabledHtmlBtn(btnRandom, true)
+    switch (oponentSelected) {
+        case "machine":
+            // console.log(oponent);
+            turns(player, oponent, true);
+            break;
+        case "create":
+            state.innerText = "waiting for the oponent to join"
+            break;
+        case "join":
+            // await handleJointToGame()
+            await readyToStart()
+            break;
+        default:
+            break;
+    }
     //select the game mode
     // let mode = gameModeSelected()
-    if (vs == undefined) {
-        alert("Please select a oponent firs")
-    } else if (vs == "machine") {
-        oponent = new Player(gameModeSelected());
-        toggle(btnRandom)
-        toggle(btnRestar)
-        turns(player, oponent, true);
-    } else {
-        multiplayer()
-        toggle(btnRandom)
-        toggle(btnRestar)
-    }
+
+    socket.emit('readyToPlay', (nameGameRoom, player))
 
 })
 
@@ -135,18 +311,14 @@ function cleanArea() {
 
 
 btnRestar.addEventListener("click", () => {
-    cleanArea()
-    disableMainPanel();
-    started();
-    // toggle(btnRandom)
-    toggle(btnRestar)
-
+    location.replace(location.href);
 })
 
 function disableMainPanel() {
     disabledHtmlBtn(btnRandom, true);
+    disabledHtmlBtn(btnVsMachine, false)
     disabledHtmlBtn(btnPlay, true);
-    disabledHtmlBtn(btnJoinGame, true);
+    disabledHtmlBtn(btnJoinGame, false);
     disabledHtmlBtn(btnMakeArmy, false)
     disabledHtmlBtn(btnJoinGame, false)
 
@@ -165,6 +337,7 @@ btnLeave.addEventListener("click", () => {
     disableMainPanel()
     toggle(btnLeave)
     started()
+    socket.emit('leave')
     // toggle(re)
 })
 
@@ -188,16 +361,10 @@ function disabledHtmlBtn(btn, toggle) {
 //set the flow of the game, turn is a boolean to know who is playing
 //true -> player || false -> machine
 async function turns(pjCurrentTurn, pjTarget, turn) {
-
-    // btnMakeArmy.disabled = true;
-    toggle(btnLeave)
-    disabledHtmlBtn(btnRandom, true);
-    disabledHtmlBtn(btnPlay, true);
-    disabledHtmlBtn(btnJoinGame, true);
-
-    // disabledHtmlBtn(btnNewGame, true);
+    // console.log("playing globla: ", playing);
+    // if (playing) {
     drawRemainPoints()
-    console.log(pjTarget);
+    // console.log(pjTarget);
     if (turn) {
         displayTurn.innerText = "Human Turn"
         // console.log("Human TURN");
@@ -210,11 +377,12 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
         if (turn) {
             attackBoard.addEventListener("click", async e => {
                 let divTarget = e.target
-                console.log("target waas : ", divTarget);
+                // console.log("target waas : ", divTarget);
 
                 // mark in the map
                 // divTarget.classList.add("hit")
                 let pointTarget = divTarget.attributes[0].nodeValue;
+
                 drawPointOfAttack(attackBoard, pointTarget)
 
                 let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
@@ -241,7 +409,6 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
     } else {
         gameOver();
     }
-
 }
 function gameOver() {
     console.log("game Over");
@@ -300,6 +467,9 @@ async function playMachine(machineBoard, humanBoard) {
         // to go a little slow
         await timeOut()
         drawPointOfAttack(positionBoard, point)
+        // if (playing) {
+
+        // }
 
         wasHIt = await checkHit(point, machineBoard, humanBoard)
         if (wasHIt) {
@@ -473,47 +643,91 @@ function quitOusidePoints(pointStr, machineBoard) {
 
 
 
+async function turnsVsFriend(pjCurrentTurn, pjTarget, turn) {
 
+    // btnMakeArmy.disabled = true;
+    toggle(btnLeave)
+    disabledHtmlBtn(btnRandom, true);
+    disabledHtmlBtn(btnPlay, true);
+    disabledHtmlBtn(btnJoinGame, true);
 
+    // disabledHtmlBtn(btnNewGame, true);
+    drawRemainPoints()
+    console.log(pjTarget);
+    if (turn) {
+        displayTurn.innerText = "Human Turn"
+        // console.log("Human TURN");
+    } else {
+        displayTurn.innerText = "Machine Turn"
+    }
+    //check if it´s posible play
+    if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
 
+        if (turn) {
+            attackBoard.addEventListener("click", async e => {
+                let divTarget = e.target
+                console.log("target waas : ", divTarget);
 
+                // mark in the map
+                // divTarget.classList.add("hit")
+                let pointTarget = divTarget.attributes[0].nodeValue;
+                drawPointOfAttack(attackBoard, pointTarget)
 
+                let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
+                // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
 
+                if (wasHit) {
+                    navHit(divTarget)
+                    //the actual PJ continue with the turn
+                    turns(pjCurrentTurn, pjTarget, true)
+                } else {
+                    turns(pjTarget, pjCurrentTurn, false)
+                }
+                // } else {
+                //     console.log("game Over");
+                //     //call function game over
+                // }
+            }, { once: true })
 
+        } else {
+            await playMachine(pjCurrentTurn, pjTarget);
+            turns(pjTarget, pjCurrentTurn, true)
+        }
 
-
-
-
-
-socket.on('updatePlayers', (players) => { // escucha por el evento
-    console.log("estos son los jugadores", players);
-
-    socket.emit("hello", "world", (response) => {
-        console.log(response); // "got it"
-    });
-
-})
-
-let rooms = [];
-function multiplayer() {
-
-
-    let nameGame = prompt("Name of the BATTLE FIELD: ")
-    socket.emit('createRoom', nameGame);
-
-
-    // player = new Player(gameModeSelected());
-    // positionShipsOn(player)
-    // oponent = "friend"
-
-
-
+    } else {
+        gameOver();
+    }
 
 }
-socket.on('readyToPlay', () => {
-    console.log("listo para jugar");
 
-})
+
+
+
+
+
+
+
+
+
+
+
+// socket.on('updatePlayers', (players) => { // escucha por el evento
+//     console.log("estos son los jugadores", players);
+
+//     socket.emit("hello", "world", (response) => {
+//         console.log(response); // "got it"
+//     });
+
+// })
+
+// let rooms = [];
+
+// socket.on('readyToPlay', (oponentBoard) => {
+//     console.log("this the oponned board:", oponentBoard);
+
+//     console.log("listo para jugar");
+
+// })
 
 
 
