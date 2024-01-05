@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', (nameRoom, idpj, callback) => {
         if (partialListRm.includes(nameRoom)) {
             console.log(`Socket ${socket.id} joined room: ${nameRoom}`);
-            callback(listPlayers[0])
+            callback([listPlayers[0], boards[0]])
             listPlayers.push(idpj)
 
         } else {
@@ -77,7 +77,8 @@ io.on('connection', (socket) => {
         boards.push(pj2)
         // todos en el room meenos este 
         //send the id of the second plyar the player that join to the game
-        socket.to(`${rommName}`).emit('readyToPlay', listPlayers[1])
+        // console.log(boards);
+        socket.to(`${rommName}`).emit('readyToPlay', listPlayers[1], boards[1])
         // console.log(players[socket.id]);ssssssss
         // await turns(players)
 
@@ -87,13 +88,32 @@ io.on('connection', (socket) => {
     })
 
 
-    socket.on('checkPointAtack', (idOponent, pto) => {
+    socket.on('pointAttacked', async (nameR, pto, cb) => {
         // let resp = await checkPto(idOponent, pto)
+        console.log(nameR, pto);
+        // await test(nameR, pto)
+        // response({ status: "ok" })
+        // io.to(`${nameR}`).emit("wasAtakked", pto);
+        io.to(`${nameR}`).emit("wasAtakked", pto, (response) => {
 
-        io.to(idOponent).emit('checkThisPto', pto)
+            console.log("Received response from client:", response);
+        });
 
-
+        cb("aceptado")
     });
+
+
+
+
+
+    // socket.on('pointAttacked', (romm, punto, callback) => {
+
+
+    //     socket.to(romm).emit("hello", punto)
+
+    //     callback()
+
+    // });
 
     socket.on('chekeated', (id, boolVal) => {
         console.log(boolVal);
@@ -103,13 +123,26 @@ io.on('connection', (socket) => {
 
 
 
+
 })
+
 
 
 
 server.listen(app.get('port'), () => {
     console.log('Server running at ', app.get('port'));
 });
+
+function emitToSocketWithCallback(socketId, eventName, data) {
+    return new Promise((resolve, reject) => {
+        io.to(socketId).emit(eventName, data, (callbackData) => {
+            resolve(callbackData);
+        });
+    });
+}
+
+
+
 
 
 async function turns(pjCurrentTurn, pjTarget, turn) {

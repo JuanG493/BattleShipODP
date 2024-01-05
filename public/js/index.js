@@ -2,7 +2,7 @@
 // main.js
 import './style.css';
 import Player from './player.js';
-// import { response } from 'express';
+
 
 const socket = io(); // aqui va el dominio
 
@@ -38,9 +38,10 @@ let btnLeave = document.querySelector("#leave")
 let state = document.querySelector("#state");
 
 let player = null;
-let oponent = null;
+let idOponent = null;
+let boardOponent = null;
 let oponentSelected = null;
-let nameGameRoom;
+let nameGameRoom = null;
 let idPlayer = null;
 // let playing = null;
 // let joinedTogame = false;
@@ -53,6 +54,7 @@ socket.on('id', (id) => {
 
 function handleCreateRoom() {
     let nameGame = prompt("Name of the BATTLE FIELD: ")
+    nameGameRoom = nameGame;
     // console.log(player.totalPoints);
     // socket.emit('createRoom', nameGame)
     socket.emit(
@@ -61,7 +63,6 @@ function handleCreateRoom() {
             coordinates: player.board.listCoordinates,
             totalPoints: player.totalPoints
         })
-    nameGameRoom = nameGame;
 }
 async function handleJointToGame() {
     let roomName = prompt("Enter the name of the game")
@@ -70,10 +71,11 @@ async function handleJointToGame() {
             if (response) {
                 console.log(`sucess join to ${roomName}`);
                 nameGameRoom = roomName
-                oponent = response;
+                idOponent = response[0];
+                boardOponent = response[1]
+                console.log(boardOponent);
+                console.log("mi id:", idPlayer, "oponent id : ", idOponent);
 
-                console.log("mi id:", idPlayer, "oponent id : ", oponent);
-                // console.log("I have the id of my op:", oponent);
                 return
             }
             else {
@@ -98,87 +100,86 @@ async function readyToStart() {
     })
 }
 
-socket.on('readyToPlay', (cb) => {
+socket.on('readyToPlay', (idOpt, boardOpt) => {
     state.innerText = "a contenden has joined to this game"
-    oponent = cb;
+    idOponent = idOpt;
+    boardOponent = boardOpt;
     displayTurn.innerText = "Your TURN"
+    console.log(boardOponent);
+    console.log("mi id:", idPlayer, "oponent id : ", idOponent);
 
-    console.log("mi id:", idPlayer, "oponent id : ", oponent);
-
-    modifyTurns(player, true)
+    modifyTurns(player, idOponent, true)
     // socket.emit('startGame')
 
     // console.log("boar oponente: ", boarOponent);
 })
 
-socket.on('checkThisPto', (pto) => {
-    let check = player.board.listCoordinates[pto];
-    socket.emit('chekeated', idPlayer, check)
+// socket.on('wasAtakked', async (pto, res) => {
+//     console.log("mensasje atake recibido");
+//     let check = player.board.listCoordinates[pto];
+//     if (check) {
+//         player.totalPoints - 1
+//         console.log("chekeando....", check);
+//     }
+//     await drawRemainPoints(player.totalPoints, boardOponent.totalPoints)
 
-    // callback(player.board.listCoordinates[pto]);
-    // if (player.board.listCoordinates[pto] == true) {
-    //     cb = true
-    // } else {
-    //     cb = false;
-    // }
+//     res(true)
 
-    // checkHit
-    //comprobar si fue jit
-})
+
+
+// })
+
 
 
 async function modifyTurns(pjCurrentTurn, turn) {
+    let targetPoint;
+    let wasHit;
     // console.log("playing globla: ", playing);
     // if (playing) {
 
-    // drawRemainPoints() // do not work for the moment need the second player
+    drawRemainPoints(player.totalPoints, boardOponent.totalPoints)
 
-    displayTurn.innerText = "your Turn"
+    displayTurn.innerText = "Your Turn"
 
 
     //check if it´s posible play
-    if (pjCurrentTurn.totalPoints > 0) {
+    if (pjCurrentTurn.totalPoints > 0 && boardOponent.totalPoints > 0) {
 
         if (turn) {
-            attackBoard.addEventListener("click", async e => {
-                let divTarget = e.target
-                // console.log("target waas : ", divTarget);
+            let pointTarget = await allowedAttack()
+            // console.log(pointTarget);
+            // let div = attackBoard.querySelector(`div[value="${pointTarget}"]`)
+            drawPointOfAttack(attackBoard, pointTarget)
+            const attak = await sendAtackk(pointTarget)
+            // div.innerText = 'X'
+            // console.log(nameGameRoom);
 
-                // mark in the map
-                // divTarget.classList.add("hit")
-                let pointTarget = divTarget.attributes[0].nodeValue;
+            let wasHit = pvpWasHit(pointTarget)
+            // attackBoard.addEventListener("click", async e => {
+            //     let divTarget = e.target
 
-                drawPointOfAttack(attackBoard, pointTarget)
+            //     let pointTarget = divTarget.attributes[0].nodeValue;
 
-                // let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
-                let wasHit;
-                // console.log(oponent);
-                socket.emit('checkPointAtack', oponent, pointTarget)
-                await socket.on('chekeated', (hit) => {
-                    wasHit = hit
-                    console.log("ksadjflkas", hit);
-                })
+            //     drawPointOfAttack(attackBoard, pointTarget)
+            //     socket.emit('pointAttacked', idOponent, pointTarget)
+            //     wasHit = pvpWasHit(pointTarget)
 
 
-                // console.log("was hit :", wasHit);
-                // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
+            // }, { once: true })
+            if (wasHit) {
 
-                // if (wasHit) {
-                //     navHit(divTarget)
-                //     //the actual PJ continue with the turn
-                //     turns(pjCurrentTurn, pjTarget, true)
-                // } else {
-                //     turns(pjTarget, pjCurrentTurn, false)
-                // }
-                // } else {
-                //     console.log("game Over");
-                //     //call function game over
-                // }
-            }, { once: true })
+                //the actual PJ continue with the turn
+                turns(pjCurrentTurn, true)
+            } else {
+                turns(pjCurrentTurn, false)
+            }
+
 
         } else {
-            await playMachine(pjCurrentTurn, pjTarget);
-            turns(pjTarget, pjCurrentTurn, true)
+            await turnOponent();
+            // turns(pjTarget, pjCurrentTurn, true)
+
+
         }
 
     } else {
@@ -187,6 +188,52 @@ async function modifyTurns(pjCurrentTurn, turn) {
     }
 }
 
+async function turnOponent(params) {
+
+
+}
+
+async function sendAtackk(puntoOfatackTarget) {
+    return new Promise((resolve, reject) => {
+
+        socket.emit('pointAttacked', idOponent, puntoOfatackTarget, (callbackData) => {
+            console.log(callbackData);
+            resolve(callbackData)
+        })
+    })
+
+}
+
+
+async function allowedAttack() {
+    return new Promise((resolve, reject) => {
+        function clickHandler(e) {
+
+            let divTarget = e.target
+            let pointTarget = divTarget.attributes[0].nodeValue;
+
+            resolve(pointTarget)
+
+            // attackBoard.removeEventListener('click', clickHandler)
+        }
+
+        attackBoard.addEventListener('click', clickHandler, { once: true })
+    })
+
+}
+
+
+//if was a hit point represent this in the attack board and rest the point
+function pvpWasHit(pto) {
+    if (boardOponent.coordinates[pto]) {
+        navHit[pto]
+        boardOponent.totalPoints - 1
+        drawRemainPoints(player.totalPoints, boardOponent.totalPoints)
+        return true;
+    } else {
+        return false;
+    }
+}
 
 
 
@@ -252,12 +299,12 @@ btnMakeArmy.addEventListener("click", () => {
         // disabledHtmlBtn(btnRandom, false)
 
         if (oponentSelected === "create") {
-            // console.log("friend");
-            handleCreateRoom()
+            //habilitar el final
+            // alert("position the army and then play to create the field for battle")
 
         } else if (oponentSelected == "machine") {
             // console.log("machine");
-            oponent = new Player(gameModeSelected());
+            idOponent = new Player(gameModeSelected());
 
         } else if (oponentSelected === "join") {
             handleJointToGame()
@@ -274,12 +321,14 @@ btnPlay.addEventListener("click", async () => {
     switch (oponentSelected) {
         case "machine":
             // console.log(oponent);
-            turns(player, oponent, true);
+            turns(player, idOponent, true);
             break;
         case "create":
+            handleCreateRoom()
             state.innerText = "waiting for the oponent to join"
             break;
         case "join":
+            drawRemainPoints(player.totalPoints, boardOponent.totalPoints)
             // await handleJointToGame()
             await readyToStart()
             break;
@@ -295,7 +344,7 @@ btnPlay.addEventListener("click", async () => {
 
 function cleanArea() {
     player = null;
-    oponent = null;
+    idOponent = null;
     positionBoard.innerHTML = "";
     attackBoard.innerHTML = "";
     pstX.innerHTML = "";
@@ -303,7 +352,7 @@ function cleanArea() {
     atkX.innerHTML = "";
     atkY.innerHTML = "";
     player = null;
-    oponent = null;
+    idOponent = null;
     leftPtsPj1.innerText = "";
     leftPtsPj2.innerText = "";
     displayTurn.innerHTML = "";
@@ -377,14 +426,9 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
         if (turn) {
             attackBoard.addEventListener("click", async e => {
                 let divTarget = e.target
-                // console.log("target waas : ", divTarget);
-
                 // mark in the map
-                // divTarget.classList.add("hit")
                 let pointTarget = divTarget.attributes[0].nodeValue;
-
                 drawPointOfAttack(attackBoard, pointTarget)
-
                 let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
                 // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
 
@@ -395,10 +439,7 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
                 } else {
                     turns(pjTarget, pjCurrentTurn, false)
                 }
-                // } else {
-                //     console.log("game Over");
-                //     //call function game over
-                // }
+
             }, { once: true })
 
         } else {
@@ -410,6 +451,8 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
         gameOver();
     }
 }
+
+
 function gameOver() {
     console.log("game Over");
     let winner = leftPtsPj1 == 0 ? "MACHINE" : "HUMAN";
@@ -417,18 +460,22 @@ function gameOver() {
     disabledHtmlBtn(btnMakeArmy, false)
 }
 
-function drawRemainPoints() {
-    leftPtsPj1.innerText = `${player.totalPoints}`
-    leftPtsPj2.innerText = `${oponent.totalPoints}`
+async function drawRemainPoints(playerPoints = player.totalPoints, oponetPoints = idOponent.totalPoints) {
+    // leftPtsPj1.innerText = `${player.totalPoints}`
+    // leftPtsPj2.innerText = `${idOponent.totalPoints}`
+
+    leftPtsPj1.innerText = `${playerPoints}`
+    leftPtsPj2.innerText = `${oponetPoints}`
 
 }
+
 function drawPointOfAttack(board, point) {
-    if (point != null) {
-        let div = board.querySelector(`div[value="${point}"]`)
-        div.innerText = "X"
-        div.innerHTML = "<img src='./images/diana.png'>"
-        div.classList.add("hit");
-    }
+    let div = board.querySelector(`div[value="${point}"]`)
+    div.innerText = "X"
+    div.innerHTML = "<img src='./images/diana.png'>"
+    div.classList.add("hit");
+    // if (point != null) {
+    // }
 }
 
 async function playMachine(machineBoard, humanBoard) {
