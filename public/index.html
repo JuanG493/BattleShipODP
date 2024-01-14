@@ -5,17 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <!-- <link rel="stylesheet" href="dist/style.css"> -->
-    <!-- <link rel="stylesheet" href="style.css"> -->
 
-    <!-- <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script> -->
-    <!-- <script src="gameBoard.js"></script> -->
 </head>
 
 <body>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-
-    <script defer src="dist/bundle.js"></script>
+    <script defer src="../dist/bundle.js"></script>
     <header></header>
     <main>
         <div id="container">
@@ -32,7 +27,7 @@
                     </div>
                 </div>
                 <h4>remain Points</h4>
-                <span id="leftPts_pj1"></span>
+                <span id="leftPts_pj1">0</span>
             </section>
             <div id="display_turn"></div>
 
@@ -47,7 +42,7 @@
                     </div>
                 </div>
                 <h4>remain Points</h4>
-                <span id="leftPts_pj2"></span>
+                <span id="leftPts_pj2">0</span>
             </section>
         </div>
 
@@ -66,9 +61,18 @@
             </fieldset>
             <fieldset id="game">
                 <legend>Select Oponnent</legend>
-                <button id="vs_machine">vs Machine</button>
-                <button id="vs_friend">crete game</button>
-                <button id="join_game">join to game</button>
+                <div id="btn_select_opt">
+                    <button id="vs_machine" value="machine">vs Machine</button>
+                    <button id="vs_friend" value="create">crete game</button>
+                    <button id="join_game" value="join">join to game</button>
+
+                </div>
+
+                <div id="nameRoom" class="selected">
+                    <label for="nameRoom_inp">Enter the room name:</label>
+                    <input id="nameRoom_inp" type="text">
+
+                </div>
             </fieldset>
 
             </div>

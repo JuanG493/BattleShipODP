@@ -148,5 +148,14 @@ button:disabled {
 
 #state {
     font-size: x-large;
+}
 
+#game {
+    height: 80px;
+}
+
+
+
+#btn_select_opt {
+    padding-bottom: 10px;
 }

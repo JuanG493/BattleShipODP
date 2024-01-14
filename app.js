@@ -34,14 +34,11 @@ let wasHit = null;
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    // listPlayers.push(socket.id)
-
     socket.emit('id', socket.id)
 
     socket.on('createRoom', (nameGame, idpj, boardPj1, response) => {
         socket.join(`${nameGame}`);
         console.log(`Socket ${socket.id} joined room: ${nameGame}`);
-        // console.log(pj1);
         boards[idpj] = boardPj1
         ListRooms[nameGame] = 1;
         listPlayers["pj1"] = idpj
@@ -52,10 +49,7 @@ io.on('connection', (socket) => {
         if (ListRooms.hasOwnProperty(`${nameRoom}`) && ListRooms[nameRoom] == 1) {
             console.log(`Socket ${socket.id} joined room: ${nameRoom}`);
             listPlayers["pj2"] = idpj
-            // console.log(listPlayers.pj1);
             callback(listPlayers.pj1)
-            // listPlayers.push(idpj)  
-
         } else {
             callback(false)
         }
@@ -63,40 +57,34 @@ io.on('connection', (socket) => {
     })
     socket.on('leave', () => {
         console.log('User disconnected');
-        // socket.
     });
 
-    //inform that the game can start
+    //listen for the indication to start the game 
     socket.on('turns', (rommName, idPj, boardPj2) => {
-        // boards.push(boardPj2)
         boards[idPj] = boardPj2
-        // todos en el room meenos este 
+        // all in the room but not this socket 
         //send the id of the second plyar the player that join to the game
         socket.to(`${rommName}`).emit('readyToPlay', listPlayers["pj2"])
-        console.log(boards);
     })
 
-
+    // recive the signal to start the game
     socket.on('gameHasStarted', async (ptoTarget, idOpt, idCurrentPj, nameRoom) => {
-
         await drawPoints(ptoTarget, idOpt, idCurrentPj)
         if (wasHit) {
             await handleTurns(idOpt, idCurrentPj, nameRoom)
-
         } else {
             await handleTurns(idCurrentPj, idOpt, nameRoom)
-
         }
-
     });
+
     // targetPj is the pj that recibe the attack
     async function drawPoints(pto, targetPj, currentPj) {
         wasHit = boards[targetPj].coordinates[pto]
-        console.log("wasHit: ", wasHit);
+        // console.log("wasHit: ", wasHit);
         if (wasHit) {
-            console.log(boards[targetPj].totalPoints);
+            // console.log(boards[targetPj].totalPoints);
             boards[targetPj].totalPoints -= 1;
-            console.log(boards[targetPj].totalPoints);
+            // console.log(boards[targetPj].totalPoints);
         }
         let remainPuntos = [boards[targetPj].totalPoints, boards[currentPj].totalPoints]
         io.to(currentPj).emit("drawAttackBoardPoint", pto, wasHit, remainPuntos)

@@ -2,7 +2,7 @@ import './style.css';
 import Player from './player.js';
 
 
-const socket = io(); // aqui va el dominio
+const socket = io(); //here the domain 
 
 
 let positionBoard = document.querySelector("#board_pst");
@@ -28,109 +28,109 @@ let btnVsMachine = document.querySelector("#vs_machine")
 let btnCreateGame = document.querySelector("#vs_friend")
 let btnLeave = document.querySelector("#leave")
 let state = document.querySelector("#state");
+let containerInputRoom = document.getElementById("nameRoom");
+let btnsSelectOponent = document.getElementById("btn_select_opt");
+const inputNameRoom = document.getElementById("nameRoom_inp");
 
 let player = null;
 let idOponent = null;
-let oponentSelected = null;
+let selectionOponentMenu = null;
 let nameGameRoom = null;
 let idPlayer = null;
+let machineAsOponent = null;
 
-
+//catch the id from the server
 socket.on('id', (id) => {
     idPlayer = id;
-    console.log(idPlayer);
+    console.log("Your id:", idPlayer);
 })
 
+
+//let to create a room to play 
 function handleCreateRoom() {
-    let nameGame = prompt("Name of the BATTLE FIELD: ")
-    nameGameRoom = nameGame;
+    nameGameRoom = inputNameRoom.value;
 
     const payload = {
         coordinates: player.board.listCoordinates,
         totalPoints: player.totalPoints
     }
-
-    socket.emit('createRoom', nameGame, idPlayer, payload, (response) => {
+    socket.emit('createRoom', nameGameRoom, idPlayer, payload, (response) => {
         if (response) {
-            console.log(`Player: ${idPlayer} has joined room: ${nameGame}`);
+            console.log(`Player: ${idPlayer} has joined room: ${nameGameRoom}`);
         }
     })
 }
-async function handleJointToGame() {
-    let roomName = prompt("Enter the name of the game")
-    if (roomName != null) {
-        socket.emit('joinRoom', roomName, idPlayer, (response) => {
-            if (response) {
-                console.log(`sucess join to romm: ${roomName}`);
-                nameGameRoom = roomName
-                idOponent = response;
-                console.log("mi id:", idPlayer, "oponent id : ", idOponent);
-                return
-            }
-            else {
-                alert(`The game <${roomName}> do not exist`)
-                handleJointToGame()
-            }
-        })
 
-    } else {
-        location.replace(location.href);
-    }
-    return
+//let a partner to joint a room that have been created
+async function handleJointToGame() {
+    return new Promise((resolve, reject) => {
+        let roomName = inputNameRoom.value
+        socket.emit('joinRoom', roomName, idPlayer, (response) => {
+            let res = response;
+            resolve(res);
+        })
+    })
 }
 
 
 async function readyToStart() {
-
     const payload = {
         coordinates: player.board.listCoordinates,
         totalPoints: player.totalPoints
-
     }
     socket.emit('turns', nameGameRoom, idPlayer, payload)
-    displayTurn.innerText = "HOST TURN"
+    displayTurn.innerText = "OPPONENT TURN"
 }
-
+//recive the indication to star the game, is the pj that create the room (HOST)
 socket.on('readyToPlay', (idOpt) => {
     state.innerText = "a contenden has joined to this game"
     idOponent = idOpt;
-    displayTurn.innerText = "Your TURN"
+    displayTurn.innerText = "YOUR TURN"
     console.log("mi id:", idPlayer, "oponent id : ", idOponent);
     startAttack()
-
 })
 
 async function startAttack() {
-    let pointTarget = await allowedAttack()
+    let cond = NaN;
+    let pointTarget;
+    //prevent to select a div that already was selected
+    do {
+        pointTarget = await allowedAttack()
+        cond = parseInt(pointTarget) ? true : false;
+    } while (!cond);
     socket.emit('gameHasStarted', pointTarget, idOponent, idPlayer, nameGameRoom)
 }
 
 socket.on('winner', (winner) => {
-    displayTurn.innerText = `The winner: ${winner}`
+    if (winner == idPlayer) {
+        displayTurn.innerText = "YOU ARE THE WINNER"
+    } else {
+        displayTurn.innerText = "YOU LOST"
+    }
 })
 
+//draw the atack into the atackBoard
 socket.on('drawAttackBoardPoint', (point, washit, restPtos) => {
-    // console.log(("esta llegando"));
     drawRemainPoints(restPtos[1], restPtos[0])
     drawPointOfAttack(attackBoard, point)
     if (washit) {
-        displayTurn.innerText = "Your TURN"
+        displayTurn.innerText = "YOUR TURN"
         let div = attackBoard.querySelector(`div[value="${point}"]`)
         navHit(div)
     } else {
-        displayTurn.innerText = "HOST TURN"
-
+        displayTurn.innerText = "OPONENT TURN"
     }
-
 })
+
+//draw the atakk into the position board
 socket.on('drawPositionBoardPoint', (point, wasHit, restPtos) => {
     drawRemainPoints(restPtos[0], restPtos[1])
     drawPointOfAttack(positionBoard, point)
     if (wasHit) {
-        displayTurn.innerText = "HOST TURN"
+        // displayTurn.innerText = "HOST TURN"
+        displayTurn.innerText = "OPONENT TURN"
     } else {
-        displayTurn.innerText = "Your TURN"
-
+        displayTurn.innerText = "YOUR TURN"
     }
 })
 
@@ -138,7 +138,7 @@ socket.on("playing", () => {
     startAttack()
 })
 
-
+//let the player to play in his attack board for a turn
 async function allowedAttack() {
     return new Promise((resolve, reject) => {
         function clickHandler(e) {
@@ -155,25 +155,27 @@ function toggle(elemnt) {
     elemnt.classList.toggle("selected")
 }
 
-btnJoinGame.addEventListener("click", () => {
-    oponentSelected = "join"
-    disbleHeaderOponents(btnJoinGame)
+//select the oponent
+btnsSelectOponent.addEventListener('click', (e) => {
+    selectionOponentMenu = e.target.value;
+    disbleHeaderOponents(e.target)
+    if (selectionOponentMenu === "join") {
+        btnMakeArmy.innerText = "Join game"
+        containerInputRoom.classList.remove('selected');
+
+    } else if (selectionOponentMenu === 'create') {
+        btnMakeArmy.innerText = "create Game"
+        containerInputRoom.classList.remove('selected');
+
+    } else {
+        containerInputRoom.classList.add('selected')
+    }
 })
 
-btnVsMachine.addEventListener("click", () => {
-    oponentSelected = "machine"
-    // toggle(btnVsFriend)
-    disbleHeaderOponents(btnVsMachine)
-})
-
-btnCreateGame.addEventListener("click", () => {
-    oponentSelected = "create"
-    disbleHeaderOponents(btnCreateGame)
-})
-
+//set the actual elemnt as disable and the other options as able
 function disbleHeaderOponents(target) {
-    let buttons = [btnVsMachine, btnCreateGame, btnJoinGame]
-    for (const btn of buttons) {
+    let buttonsOponent = [btnVsMachine, btnCreateGame, btnJoinGame]
+    for (const btn of buttonsOponent) {
         if (btn === target) {
             target.disabled = true
         } else {
@@ -185,74 +187,98 @@ function disbleHeaderOponents(target) {
 btnRandom.addEventListener("click", () => {
     cleanArea()
     started()
-    // console.log(mode);
     player = new Player(gameModeSelected());
-    console.log(player);
-    // oponent = new Player(gameModeSelected())
     positionShipsOn(player)
-
 })
 
-btnMakeArmy.addEventListener("click", () => {
-
-    if (oponentSelected == null) {
-        alert("Please select a oponent first")
+btnMakeArmy.addEventListener("click", async () => {
+    if (selectionOponentMenu == null) {
+        alert("Please select a oponent")
 
     } else {
-        // disabledHtmlBtn(btnRandom, false)
-        disabledHtmlBtn(btnMakeArmy, true)
-        disabledHtmlBtn(btnPlay, false)
-        toggle(btnRandom)
-        // toggle(btnRestar)
-        toggle(btnRestar)
-        // toggle(btnRestar)
+        if (selectionOponentMenu === "create") {
+            if (inputNameRoom.value == "") {
+                alert("Please enter a room name firs")
+            } else {
+                hablePanel()
+            }
 
-        player = new Player(gameModeSelected());
-        console.log(player);
-        positionShipsOn(player)
-        // disabledHtmlBtn(btnRandom, false)
-
-        if (oponentSelected === "create") {
-            //habilitar el final
-            // alert("position the army and then play to create the field for battle")
-
-        } else if (oponentSelected == "machine") {
-            // console.log("machine");
-            idOponent = new Player(gameModeSelected());
-
-        } else if (oponentSelected === "join") {
-            handleJointToGame()
-            toggle(btnLeave, true)
-
+        } else if (selectionOponentMenu === "join") {
+            if (inputNameRoom.value == "") {
+                alert("Please enter a room name firs")
+            } else {
+                let response = await handleJointToGame();
+                // console.log(response);
+                if (response) {
+                    console.log(`sucess join to romm: ${inputNameRoom.value}`);
+                    idOponent = response;
+                    nameGameRoom = inputNameRoom.value
+                    console.log("mi id:", idPlayer, "oponent id : ", idOponent);
+                    hablePanel()
+                    toggle(btnLeave, true)
+                }
+                else {
+                    alert(`The game: ${inputNameRoom.value} do not exist`)
+                }
+            }
+            // for vs machine
+        } else {
+            hablePanel()
+            machineAsOponent = new Player(gameModeSelected());
         }
     }
 })
+//................................................................................
+function dragstartHandler(ev) {
+    console.log(player);
+    console.log(this.classList[0]);
+    let sameCls = document.querySelector(`."${this.classList[0]}"`);
+    sameCls.forEach()
+
+
+
+}
+
+function testing() {
+    // const shipst = document.querySelectorAll(".ship");
+    const shipst = document.querySelectorAll(".ship");
+    shipst.forEach(element => {
+        element.addEventListener('dragstart', dragstartHandler)
+
+    });
+
+}
+
+
+function hablePanel() {
+    player = new Player(gameModeSelected());
+    positionShipsOn(player)
+    testing(player);
+    disabledHtmlBtn(btnMakeArmy, true)
+    disabledHtmlBtn(btnPlay, false)
+    toggle(btnRandom)
+    toggle(btnRestar)
+}
 
 btnPlay.addEventListener("click", async () => {
-    // playing = true;
     disabledHtmlBtn(btnPlay, true)
     disabledHtmlBtn(btnRandom, true)
-    switch (oponentSelected) {
+    switch (selectionOponentMenu) {
         case "machine":
-            // console.log(oponent);
-            turns(player, idOponent, true);
+            await turns(player, machineAsOponent, true);
             break;
         case "create":
             handleCreateRoom()
             state.innerText = "waiting for the oponent to join"
+            socket.emit('readyToPlay', (nameGameRoom, player))
             break;
         case "join":
-            // drawRemainPoints(player.totalPoints, boardOponent.totalPoints)
-            // await handleJointToGame()
             await readyToStart()
+            socket.emit('readyToPlay', (nameGameRoom, player))
             break;
         default:
             break;
     }
-
-
-    socket.emit('readyToPlay', (nameGameRoom, player))
-
 })
 
 function cleanArea() {
@@ -266,8 +292,9 @@ function cleanArea() {
     atkY.innerHTML = "";
     player = null;
     idOponent = null;
-    leftPtsPj1.innerText = "";
-    leftPtsPj2.innerText = "";
+    machineAsOponent = null;
+    leftPtsPj1.innerText = "0";
+    leftPtsPj2.innerText = "0";
     displayTurn.innerHTML = "";
 }
 
@@ -283,9 +310,7 @@ function disableMainPanel() {
     disabledHtmlBtn(btnJoinGame, false);
     disabledHtmlBtn(btnMakeArmy, false)
     disabledHtmlBtn(btnJoinGame, false)
-
 }
-
 
 function started() {
     drawBasicBoard(positionBoard, pstY, pstX)
@@ -300,7 +325,6 @@ btnLeave.addEventListener("click", () => {
     toggle(btnLeave)
     started()
     socket.emit('leave')
-    // toggle(re)
 })
 
 function gameModeSelected() {
@@ -323,19 +347,14 @@ function disabledHtmlBtn(btn, toggle) {
 //set the flow of the game, turn is a boolean to know who is playing
 //true -> player || false -> machine
 async function turns(pjCurrentTurn, pjTarget, turn) {
-    // console.log("playing globla: ", playing);
-    // if (playing) {
     drawRemainPoints()
-    // console.log(pjTarget);
     if (turn) {
         displayTurn.innerText = "Human Turn"
-        // console.log("Human TURN");
     } else {
         displayTurn.innerText = "Machine Turn"
     }
     //check if it´s posible play
     if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
-
         if (turn) {
             attackBoard.addEventListener("click", async e => {
                 let divTarget = e.target
@@ -343,8 +362,6 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
                 let pointTarget = divTarget.attributes[0].nodeValue;
                 drawPointOfAttack(attackBoard, pointTarget)
                 let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
-                // if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
-
                 if (wasHit) {
                     navHit(divTarget)
                     //the actual PJ continue with the turn
@@ -352,14 +369,11 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
                 } else {
                     turns(pjTarget, pjCurrentTurn, false)
                 }
-
             }, { once: true })
-
         } else {
             await playMachine(pjCurrentTurn, pjTarget);
             turns(pjTarget, pjCurrentTurn, true)
         }
-
     } else {
         gameOver();
     }
@@ -368,23 +382,21 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
 
 function gameOver() {
     console.log("game Over");
-    let winner = leftPtsPj1 == 0 ? "MACHINE" : "HUMAN";
-    displayTurn.innerText = winner, "Win";
+    let winner = player.totalPoints == 0 ? "MACHINE" : "HUMAN";
+    displayTurn.innerText = winner + " Win";
     disabledHtmlBtn(btnMakeArmy, false)
 }
 
-async function drawRemainPoints(playerPoints = player.totalPoints, oponetPoints = idOponent.totalPoints) {
+async function drawRemainPoints(playerPoints = player.totalPoints, oponetPoints = machineAsOponent.totalPoints) {
     leftPtsPj1.innerText = `${playerPoints}`
     leftPtsPj2.innerText = `${oponetPoints}`
-
 }
 
 function drawPointOfAttack(board, point) {
     let div = board.querySelector(`div[value="${point}"]`)
-    div.innerText = "X"
+    // div.innerText = "X"
     div.innerHTML = "<img src='./images/diana.png'>"
     div.classList.add("hit");
-
 }
 
 async function playMachine(machineBoard, humanBoard) {
@@ -393,8 +405,8 @@ async function playMachine(machineBoard, humanBoard) {
     let partialpoint
     do {
         //serch for a point around the last hit
-        //it is think that work after ther second iteration
         let prevElemts = machineBoard.getLastGooPositionOfAtk();
+        //it is think that work after ther second iteration
         if (wasHIt || prevElemts[0] != undefined) {
             //while still good position take those
             if (prevElemts.length > 0) {
@@ -407,26 +419,18 @@ async function playMachine(machineBoard, humanBoard) {
                 partialpoint = machineBoard.board.getRandomInt(0, around.length - 1)
                 point = around[partialpoint]
                 machineBoard.removeAgoodPosition(point);
-
             }
-
-
         } else {
             do {
                 point = machineBoard.board.getRandomInt();
                 // prevent to select a point that alredy was selectec - is a hash map
             } while (machineBoard.getMapPointAttk(point));
-
         }
         //select the point on the position board
         let div = positionBoard.querySelector(`div[value="${point}"]`)
         // to go a little slow
         await timeOut()
         drawPointOfAttack(positionBoard, point)
-        // if (playing) {
-
-        // }
-
         wasHIt = await checkHit(point, machineBoard, humanBoard)
         if (wasHIt) {
             navHit(div)
@@ -438,10 +442,7 @@ async function playMachine(machineBoard, humanBoard) {
         machineBoard.setMapPointsAttk(point)
         //clean the remain options for a point
         cleanGoodPositions(machineBoard, machineBoard.getLastGooPositionOfAtk())
-
-    } while (wasHIt);
-
-
+    } while (wasHIt && humanBoard.totalPoints > 0);
 }
 
 function cleanGoodPositions(machineBoard, listPositiones) {
@@ -454,28 +455,22 @@ function cleanGoodPositions(machineBoard, listPositiones) {
 
 function timeOut(ms = 2000) {
     return new Promise(resolve => setTimeout(resolve, ms))
-
 }
 
 function navHit(ship) {
     ship.classList.add("nav_hit")
-
 }
 // check if a ship was hit, if so call the methos to discount points 
 //point -> the selected point on the map
 async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
     let point = parseInt(unFormatPoint);
     let coord = Object.values(playerTarget.board)[0];
-    // attackBoard
     //if hit
     if (coord[point]) {
-
         let ship = playerTarget.identifyShip(point)
         ship.hit()
-        // ship.classList.add("hitNav")
         playerTarget.discountPoint();
         return true
-
     } else {
         return false;
     };
@@ -486,83 +481,64 @@ async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
 function positionShipsOn(player) {
     let listNav = player.listShips;
     listNav.forEach(nav => {
-        // console.log(nav.getPositions());
-        // let tst = nav;
-        // console.log(nav.getId());
         marker(nav.getPositions(), nav.getId())
-
     });
 }
+
 //draw the point (ship) in the board
 function marker(arrylist, id) {
-
-    // console.log(identifier);
     arrylist.forEach(elm => {
         let tempo = document.querySelector(`div[value="${elm}"]`)
-        //limpiar despues de crear
+        //draggable..............................................................
+        tempo.setAttribute('draggable', "true")
+        // tempo.setAttribute('ondragstart', "drag(id)");
         tempo.setAttribute('class', `${id}`)
         tempo.classList.add("ship")
     });
-
 }
 //draw the grid and the indicators
 function drawBasicBoard(targetBoard, y, x) {
     let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
     for (let i = 0; i < 100; i++) {
         if (i < 10) {
-
             let ind = document.createElement("div");
             ind.innerText = i + 1;
             y.appendChild(ind)
-
             let sInd = document.createElement("div");
             sInd.innerText = letter[i]
             x.appendChild(sInd)
-
         }
         let square = document.createElement("div");
         square.setAttribute("value", `${i}`);
         targetBoard.appendChild(square);
         if (targetBoard != positionBoard) {
             square.classList.add("squareAttack")
-
         }
-
     }
-
 }
 //return a list of valid points around a point and add to board those elemnts
 function serchNerbyPto(pointStr, listPtosAttaked, machineBoard) {
-
-
     let partialPerimeter = []
-    //all the 8 points around
+    //the 4 points around
     let pointsAround = [
         pointStr - 1,
         pointStr + 1,
         pointStr - 10,
         pointStr + 10,
     ]
-
     let topesList = topes(pointStr)
     pointsAround.forEach(element => {
-
         if (listPtosAttaked[element] == undefined && !(topesList.includes(element))) {
             partialPerimeter.push(element)
         }
     });
-
-    // machineBoard.setCornerPtos(cornersPoints)
     machineBoard.setLastGoodPositionsOfAtk(partialPerimeter);
     return partialPerimeter
-
-
 }
-
+//identify that the points are valid
 function topes(pointStr) {
     let baseRow = Math.floor(pointStr / 10);
     let baseCol = pointStr % 10
-
     let topes = []
     if (baseCol == 9) {
         topes.push(...[pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1])
@@ -574,9 +550,7 @@ function topes(pointStr) {
     } if (baseRow == 9) {
         topes.push(...[pointStr + 10, (pointStr + 10) - 1, (pointStr + 10) + 1])
     }
-
     return topes
-
 }
 
 function quitOusidePoints(pointStr, machineBoard) {
@@ -587,13 +561,10 @@ function quitOusidePoints(pointStr, machineBoard) {
         (pointStr + 1) + 10,
         (pointStr + 1) - 10
     ]
-
     for (const pto of discountPoints) {
         if (!topesList.includes(pto)) {
             machineBoard.setMapPointsAttk(pto)
-            // cornersPoints.push(iter)
         }
-
     }
 }
 

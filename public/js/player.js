@@ -12,6 +12,7 @@ export default class Player {
     #mapPointsOfAttacked = [];
     // #listCornerPoints = [];
     #lastGoodPositionsOfAtk = [];
+    // #listClassShips = [];
     // #randomSizes = [];
 
     constructor(mode) {
@@ -21,6 +22,13 @@ export default class Player {
         this.setTotalPoints();
     }
 
+    // setListClassShips(){
+    //     this.listShips.forEach(element => {
+    //         if(this.#listClassShips.cotains) element.getId()
+
+    //     });
+
+    // }
     getTotalPoints() {
         return this.totalPoints;
     }
@@ -33,12 +41,7 @@ export default class Player {
     discountPoint() {
         this.totalPoints--;
     }
-    // setCornerPtos(list) {
-    //     this.#listCornerPoints.push(...list)
-    // }
-    // getCornerPoints() {
-    //     return this.#listCornerPoints;
-    // }
+
 
     setLastGoodPositionsOfAtk(points) {
         this.#lastGoodPositionsOfAtk.push(...points)
