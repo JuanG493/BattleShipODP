@@ -229,31 +229,132 @@ btnMakeArmy.addEventListener("click", async () => {
     }
 })
 //................................................................................
-function dragstartHandler(ev) {
-    console.log(player);
-    console.log(this.classList[0]);
-    let sameCls = document.querySelector(`."${this.classList[0]}"`);
-    sameCls.forEach()
+
+// over destine zone
+// positionBoard.addEventListener("dragenter", handleDragEnter, false);
+// positionBoard.addEventListener("dragover", handleDragOver, false);
+// positionBoard.addEventListener("drop", soltado, false);
+
+
+
+function handleDragEnter(e) {
+    e.preventDefault()
+
+}
+
+
+function handleDragOver(e) {
+    e.preventDefault()
+    console.dir(this);
+    console.log(e.target.attributes[0].values);
+    // if(player.board.listUnavailable.includes(this));
+    // if(player.board.)
+
+    // this es todo el elmento sobre el que se esta arrastrando
+
+    // let notAvilable = player.board.listUnavailable;
+    // console.log(elementOrigin.value);
 
 
 
 }
+function soltado(e) {
+    // e.preventDefault()
+    // console.log("soldado");
+    // console.log(this);
+    // console.dir(elementOrigin.attributes.value);
+    // console.log(elementOrigin.value);
+    // console.log(elementOrigin.value);
 
-function testing() {
+
+}
+
+//over the element
+function dragHandler(e) {
+    // console.log("Dragind");
+    // e.dataTransfer.setData = ('text', this.values)
+    // e.preventDefault();
+    // let info = e.get
+    elementOrigin = this;
+    console.log(e.target);
+
+}
+let elementOrigin = null
+
+function controlDrag() {
+    let frames = positionBoard.querySelectorAll('div');
+    for (const fr of frames) {
+        fr.addEventListener("dragover", handleDragOver);
+        fr.addEventListener("drop", soltado);
+    }
+
+    let sameCls = document.querySelectorAll('.dragShip');
+    sameCls.forEach(itm => {
+        itm.addEventListener('dragstart', dragHandler, true)
+
+        // console.log(sameCls);
+    })
+
+    // // const shipst = document.querySelectorAll(".ship");
     // const shipst = document.querySelectorAll(".ship");
-    const shipst = document.querySelectorAll(".ship");
-    shipst.forEach(element => {
-        element.addEventListener('dragstart', dragstartHandler)
+    // shipst.forEach(element => {
+    //     element.addEventListener('mousedown', preDrag)
 
-    });
+    // });
 
 }
 
+//create a div that cover the size of the ship
+function makingNewDiv() {
+    const pxSize = 40;
+
+    for (const cls of player.getListClass()) {
+        let target = positionBoard.querySelector(`.${cls}`)
+        let newDiv = document.createElement('div')
+        let listOfCoordinates = cls.split("_")
+        //format the coordinates to creat the div in the right place
+        listOfCoordinates.shift();
+        listOfCoordinates.sort((a, b) => a - b);
+
+        let sizeDiv = listOfCoordinates.length;
+
+        let direccion = "none";
+        if (listOfCoordinates.length > 1) {
+            direccion = (+listOfCoordinates[1] - (+listOfCoordinates[0])) == 1 ? "hrz" : "vert"
+        };
+
+        newDiv.classList.add(`${cls}`)
+        newDiv.classList.add('dragShip')
+        newDiv.setAttribute('value', `${listOfCoordinates}`)
+
+        newDiv.classList.add(`${direccion}_${sizeDiv}`)
+        // newDiv.style.backgroundColor = "red"
+        newDiv.style.border = "solid 5px red"
+        newDiv.setAttribute('draggable', "true")
+
+        if (direccion === "hrz") {
+            newDiv.style.width = `${pxSize * sizeDiv}px`;
+            newDiv.style.height = `${pxSize}px`;
+        } else {
+            newDiv.style.height = `${pxSize * sizeDiv}px`;
+        }
+
+        target.style.position = "relative";
+        target.appendChild(newDiv)
+
+    }
+
+}
 
 function hablePanel() {
     player = new Player(gameModeSelected());
     positionShipsOn(player)
-    testing(player);
+
+    //create the elements for drag
+    makingNewDiv()
+    controlDrag(player); //start here //..................................here draw
+
+
     disabledHtmlBtn(btnMakeArmy, true)
     disabledHtmlBtn(btnPlay, false)
     toggle(btnRandom)
@@ -481,21 +582,34 @@ async function checkHit(unFormatPoint, playerInTurn, playerTarget) {
 function positionShipsOn(player) {
     let listNav = player.listShips;
     listNav.forEach(nav => {
-        marker(nav.getPositions(), nav.getId())
+        // console.log(nav);
+        marker(nav.getPositions(), nav.getClass())
     });
 }
 
 //draw the point (ship) in the board
-function marker(arrylist, id) {
+function marker(arrylist, className) {
     arrylist.forEach(elm => {
         let tempo = document.querySelector(`div[value="${elm}"]`)
-        //draggable..............................................................
-        tempo.setAttribute('draggable', "true")
-        // tempo.setAttribute('ondragstart', "drag(id)");
-        tempo.setAttribute('class', `${id}`)
+        // tempo.setAttribute('draggable', "true")
+        tempo.classList.add(`${className}`)
         tempo.classList.add("ship")
+
+
+        //draggable.......................................................................
+        // // tempo.setAttribute('ondragstart', "drag(id)");
+        // let listClas = className.split("_");
+        // // console.log(listClas);
+
+        // if (listClas.length == 1) {
+        //     makingNewDiv(tempo, tempo.getBoundingClientRect())
+        //     console.log(player);
+        // }
     });
 }
+
+
+
 //draw the grid and the indicators
 function drawBasicBoard(targetBoard, y, x) {
     let letter = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']

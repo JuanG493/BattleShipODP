@@ -37,9 +37,9 @@ class Ship {
     getPositions() {
         return this.#positions;
     }
-    getId() {
+    getClass() {
         const regex = /,/g
-        return (this.getType() + this.getPositions().toString().replace(regex, "_")).replace(" ", "_")
+        return (this.getType() + "_" + this.getPositions().toString().replace(regex, "_")).replace(" ", "_")
     }
 
     hit() {
@@ -50,7 +50,7 @@ class Ship {
     }
 
     #setSunk() {
-        if (this.#hitsRecived >= this.lenghtShip) {
+        if (this.#hitsRecived >= this.#lenghtShip) {
             this.#sunk = true;
         }
         return this.#sunk
@@ -62,7 +62,7 @@ class Ship {
                 this.#type = "boat"
                 break;
             case 2:
-                this.#type = "Patrol Boat"
+                this.#type = "PatrolBoat"
                 break
             case 3:
                 this.#type = "Submarine"

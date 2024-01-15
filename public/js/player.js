@@ -10,25 +10,36 @@ export default class Player {
     numbOfShips = null;
     totalPoints = 0;
     #mapPointsOfAttacked = [];
-    // #listCornerPoints = [];
     #lastGoodPositionsOfAtk = [];
-    // #listClassShips = [];
-    // #randomSizes = [];
+    #listClassShips = [];
 
     constructor(mode) {
         this.setModeGame(mode);
         this.setShips();
         this.board = new GameBoard(this.listShips);
         this.setTotalPoints();
+        this.setListClassShips();
     }
 
-    // setListClassShips(){
-    //     this.listShips.forEach(element => {
-    //         if(this.#listClassShips.cotains) element.getId()
+    setListClassShips() {
 
-    //     });
+        for (const element of this.listShips) {
+            if (!this.#listClassShips.includes(element.getClass())) {
+                let tempo = element.getClass();
+                this.#listClassShips.push(tempo)
+            }
+        }
+        // console.log(this.#listClassShips);
+        // for (const itr of this.#listClassShips) {
+        //     let tt = itr.splite("_")
 
-    // }
+
+        // }
+
+    }
+    getListClass() {
+        return this.#listClassShips
+    }
     getTotalPoints() {
         return this.totalPoints;
     }
