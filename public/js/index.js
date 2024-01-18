@@ -230,78 +230,78 @@ btnMakeArmy.addEventListener("click", async () => {
 })
 //................................................................................
 
+
+
+let dragShipMoving = null
+let innerPositionShip = null;
+let elmentsOfship = {
+    direccion: null,
+    up: null,
+    down: null,
+    left: null,
+    right: null
+}
+let targetPointer = null;
+
+
 // over destine zone
-// positionBoard.addEventListener("dragenter", handleDragEnter, false);
-// positionBoard.addEventListener("dragover", handleDragOver, false);
+positionBoard.addEventListener("dragenter", dragEnterHandlerZD, false);
+positionBoard.addEventListener("dragover", dragOverHandlerZD, false);
 // positionBoard.addEventListener("drop", soltado, false);
 
 
 
-function handleDragEnter(e) {
+function dragEnterHandlerZD(e) {
     e.preventDefault()
 
 }
-
-
-function handleDragOver(e) {
+function dragOverHandlerZD(e) {
     e.preventDefault()
-    console.dir(this);
-    console.log(e.target.attributes[0].values);
+    let partial = e.target;
+    if (targetPointer != partial) {
+        targetPointer = partial;
+        console.log("tartget: ", e.target);
+    }
+    // console.log(e.target.attributes[0].values);
     // if(player.board.listUnavailable.includes(this));
     // if(player.board.)
-
     // this es todo el elmento sobre el que se esta arrastrando
-
     // let notAvilable = player.board.listUnavailable;
     // console.log(elementOrigin.value);
-
-
-
 }
+
 function soltado(e) {
     // e.preventDefault()
     // console.log("soldado");
     // console.log(this);
     // console.dir(elementOrigin.attributes.value);
     // console.log(elementOrigin.value);
-    // console.log(elementOrigin.value);
-
-
 }
 
 //over the element
-function dragHandler(e) {
-    // console.log("Dragind");
-    // e.dataTransfer.setData = ('text', this.values)
-    // e.preventDefault();
-    // let info = e.get
-    elementOrigin = this;
-    console.log(e.target);
+function dragStartHandler(e) {
+    //determianr la direccion?
+    //determianr las posiciones hacia arriba?
+    //comprobar cuando se posicione el pointer (mouse over other elemnt)?
+    dragShipMoving = this;
+    let clasePositions = dragShipMoving
 
+    console.log("click: ", innerPositionShip.attributes);
+    console.dir(clasePositions);
 }
-let elementOrigin = null
 
 function controlDrag() {
-    let frames = positionBoard.querySelectorAll('div');
+    let frames = positionBoard.querySelectorAll('.ship');
     for (const fr of frames) {
-        fr.addEventListener("dragover", handleDragOver);
-        fr.addEventListener("drop", soltado);
+        fr.addEventListener('mousedown', () => {
+            innerPositionShip = fr;
+        })
     }
 
     let sameCls = document.querySelectorAll('.dragShip');
     sameCls.forEach(itm => {
-        itm.addEventListener('dragstart', dragHandler, true)
-
-        // console.log(sameCls);
+        itm.addEventListener('dragstart', dragStartHandler, true)
     })
-
-    // // const shipst = document.querySelectorAll(".ship");
-    // const shipst = document.querySelectorAll(".ship");
-    // shipst.forEach(element => {
-    //     element.addEventListener('mousedown', preDrag)
-
-    // });
-
 }
 
 //create a div that cover the size of the ship
@@ -325,7 +325,8 @@ function makingNewDiv() {
 
         newDiv.classList.add(`${cls}`)
         newDiv.classList.add('dragShip')
-        newDiv.setAttribute('value', `${listOfCoordinates}`)
+        newDiv.values = `${listOfCoordinates}`
+        // newDiv.setAttribute('value', `${listOfCoordinates}`)
 
         newDiv.classList.add(`${direccion}_${sizeDiv}`)
         // newDiv.style.backgroundColor = "red"

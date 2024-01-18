@@ -116,7 +116,7 @@ class GameBoard {
         return result;
     }
     // check all the direccions around a point,
-    // return the perimeter around a point
+    // return the perimeter around a point or false if the perimeter is not valid
     helperCheckPst(pointStr) {
         let baseRow = Math.floor(pointStr / 10);
         let baseCol = pointStr % 10
