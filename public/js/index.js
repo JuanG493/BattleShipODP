@@ -232,8 +232,8 @@ btnMakeArmy.addEventListener("click", async () => {
 
 
 
-let dragShipMoving = null
-let innerPositionShip = null;
+let targetShipDraging = null
+let targetDivDraging = null;
 let elmentsOfship = {
     direccion: null,
     up: null,
@@ -245,62 +245,131 @@ let targetPointer = null;
 
 
 // over destine zone
-positionBoard.addEventListener("dragenter", dragEnterHandlerZD, false);
-positionBoard.addEventListener("dragover", dragOverHandlerZD, false);
+positionBoard.addEventListener("dragenter", dragEnterHandlerDropZone, false);
+positionBoard.addEventListener("dragover", dragOverHandlerDropZone, false);
 // positionBoard.addEventListener("drop", soltado, false);
 
+function checkValidPosition(target) {
+    let listValuesShip = targetShipDraging.values.split(",");
+    let valueTargedDiv = targetDivDraging.attributes.value.value;
+    let direccion = targetShipDraging.classList[2];
+    let valueTempoHover = target.attributes.value.value;
+    let diferentia = valueTempoHover - valueTargedDiv > 0 ? "+" : "-";
+    console.log("div Hover: ", valueTempoHover);
+    console.log("div Targed div: ", valueTargedDiv);
+    console.log("target div: ", targetDivDraging);
+    console.log(diferentia);
+    console.log(valueTempoHover - valueTargedDiv);
+    console.log(listValuesShip);
+
+    // pocision vertical
+    let listNotAvailable = player.board.listUnavailable;
+    let partialNewList = [];
+
+    for (const iter of listValuesShip) {
+
+        if (listNotAvailable.includes(+iter + diferentia)) {
 
 
-function dragEnterHandlerZD(e) {
+        }
+
+
+
+    }
+
+    // if (valueTempoHover > valueTargedDiv) {
+    //    diferentia = valueTempoHover - valueTargedDiv;
+    // } else {
+    //    diferentia = valueTargedDiv - valueTempoHover;
+
+    // }
+    // pocision horizontal
+
+
+    // console.log((targetDivDraging.classList[0]).split("_").slice(1));
+
+    // let divTarget = positionBoard.querySelector()
+}
+
+
+function dragEnterHandlerDropZone(e) {
     e.preventDefault()
 
 }
-function dragOverHandlerZD(e) {
+function dragOverHandlerDropZone(e) {
     e.preventDefault()
     let partial = e.target;
-    if (targetPointer != partial) {
+    // prevent to select as target the actual zone of the ship
+    if (targetPointer != partial && partial != targetShipDraging && partial != targetDivDraging) {
         targetPointer = partial;
-        console.log("tartget: ", e.target);
+        checkValidPosition(targetPointer)
+        // console.log("tartget: ", e.target);
     }
-    // console.log(e.target.attributes[0].values);
-    // if(player.board.listUnavailable.includes(this));
-    // if(player.board.)
-    // this es todo el elmento sobre el que se esta arrastrando
-    // let notAvilable = player.board.listUnavailable;
-    // console.log(elementOrigin.value);
+
 }
 
 function soltado(e) {
-    // e.preventDefault()
     // console.log("soldado");
-    // console.log(this);
-    // console.dir(elementOrigin.attributes.value);
-    // console.log(elementOrigin.value);
 }
 
 //over the element
 function dragStartHandler(e) {
-    //determianr la direccion?
-    //determianr las posiciones hacia arriba?
-    //comprobar cuando se posicione el pointer (mouse over other elemnt)?
-    dragShipMoving = this;
-    let clasePositions = dragShipMoving
 
-    console.log("click: ", innerPositionShip.attributes);
-    console.dir(clasePositions);
+    targetShipDraging = this;
+    // console.log(this.attributes["class"]);
+    // let clasePositions = dragShipMoving
+
+    // console.log("click: ", innerPositionShip.attributes);
+    // console.log(clasePositions);
 }
 
 function controlDrag() {
-    let frames = positionBoard.querySelectorAll('.ship');
-    for (const fr of frames) {
-        fr.addEventListener('mousedown', () => {
-            innerPositionShip = fr;
+    let actualDivTarget = 0;
+    let dragShip;
+    let min = null;
+    // positionBoard.addEventListener("mouseover", (e) => {
+    //     // if(e.target.)
+    //     console.dir(e.target.attributes);
+    // })
+    let positionShip = positionBoard.querySelectorAll('.ship');
+    for (const fr of positionShip) {
+
+        fr.addEventListener('mouseenter', (e) => {
+
+            if (e.target != document.getElementById(`${fr.classList[0]}`)) {
+                console.log(fr);
+                actualDivTarget = fr.attributes.value.value;
+                min = (fr.classList[0]).split("_")[1];
+
+
+                console.log("partial value: ", actualDivTarget);
+                dragShip = document.getElementById(`${fr.classList[0]}`)
+                // console.log(dragShip);
+                dragShip.style.display = "block"
+                targetDivDraging = fr;
+
+            }
+
+            // if (min == null && actualDivTarget == 0) {
+            // };
+
+
+        })
+        // fr.addEventListener('mousedown', () => {
+        //     dragShip.style.display = "block"
+        // })
+
+        fr.addEventListener('mouseleave', () => {
+            dragShip.style.display = "none";
+            min = null;
+            // actualDivTarget = 0;
+
         })
     }
-
+    // drag Big Divs
     let sameCls = document.querySelectorAll('.dragShip');
     sameCls.forEach(itm => {
-        itm.addEventListener('dragstart', dragStartHandler, true)
+        itm.addEventListener('dragstart', dragStartHandler)
     })
 }
 
@@ -312,6 +381,8 @@ function makingNewDiv() {
         let target = positionBoard.querySelector(`.${cls}`)
         let newDiv = document.createElement('div')
         let listOfCoordinates = cls.split("_")
+        // console.log("lisfCoodinates", listOfCoordinates);
+        // console.log(listOfCoordinates[0]);
         //format the coordinates to creat the div in the right place
         listOfCoordinates.shift();
         listOfCoordinates.sort((a, b) => a - b);
@@ -323,9 +394,12 @@ function makingNewDiv() {
             direccion = (+listOfCoordinates[1] - (+listOfCoordinates[0])) == 1 ? "hrz" : "vert"
         };
 
-        newDiv.classList.add(`${cls}`)
-        newDiv.classList.add('dragShip')
-        newDiv.values = `${listOfCoordinates}`
+        newDiv.classList.add(`${cls}`);
+        newDiv.classList.add('dragShip');
+        newDiv.values = `${listOfCoordinates}`;
+        newDiv.style.display = "none"
+        newDiv.setAttribute('id', `${cls}`)
+        // newDiv.style.zIndex = "-1";
         // newDiv.setAttribute('value', `${listOfCoordinates}`)
 
         newDiv.classList.add(`${direccion}_${sizeDiv}`)
@@ -595,21 +669,11 @@ function marker(arrylist, className) {
         // tempo.setAttribute('draggable', "true")
         tempo.classList.add(`${className}`)
         tempo.classList.add("ship")
+        // tempo.style.zIndex = "1";
 
 
-        //draggable.......................................................................
-        // // tempo.setAttribute('ondragstart', "drag(id)");
-        // let listClas = className.split("_");
-        // // console.log(listClas);
-
-        // if (listClas.length == 1) {
-        //     makingNewDiv(tempo, tempo.getBoundingClientRect())
-        //     console.log(player);
-        // }
     });
 }
-
-
 
 //draw the grid and the indicators
 function drawBasicBoard(targetBoard, y, x) {
