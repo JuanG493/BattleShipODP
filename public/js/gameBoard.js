@@ -2,18 +2,19 @@
 //recive a array of ships to set the position on the board like {1,2,5,3} where each int represent a size
 // TODO //1.makeboard //2. set the position of boards
 
-class GameBoard {
+export default class GameBoard {
     listCoordinates = [];
     listUnavailable = [];
 
     constructor(armada) {
         this.makeBoard();
-        armada.forEach(nav => {
-            // console.dir(nav.getSizeShip());
+        for (const nav of armada) {
             let positionsNav = this.positionShip(nav.getSizeShip());
             //set the coordinates of nav into the nav
-            nav.setPosition(positionsNav);
-        })
+            nav.setPosition(positionsNav[0]);
+            nav.setSpaceAround(positionsNav[1]);
+
+        }
     }
 
     makeBoard() {
@@ -29,7 +30,7 @@ class GameBoard {
         //TODO the initial search can be better?
         while (true) {
             position = this.getRandomInt();
-            // if true (the point it clear), the item can be taken as point of start
+            // if true (the point it´s clear), the item can be taken as point of start
             if (this.listCoordinates[position] == false) {
                 bluprint = this.direcction(position, size)
                 //if true there are at least one direccion to build the ship
@@ -41,8 +42,9 @@ class GameBoard {
         // bluprint[0] are the points to construct the Ship
         // fill the global variables with the values
         bluprint[0].map((elm) => this.listCoordinates[elm] = true)
+        // console.log("points of ship: ", bluprint[0], "point no availables:", bluprint[1]);
         this.listUnavailable.push(...[...bluprint[1]]);
-        return bluprint[0];
+        return bluprint;
     }
 
     // take a point of star and determine a direction to build the ship 
@@ -99,7 +101,7 @@ class GameBoard {
         for (let i = 0; i < sizeShip; i++) {
             //check all the around of the point, if the space is available
             // false means a ship in that position
-            let partial = this.helperCheckPst(point);
+            let partial = GameBoard.helperCheckPst(point, this.listCoordinates);
             if (partial !== false) {
                 listPointsConstruction.push(point);
                 listPointInPerimeter.push(...partial.filter((elm) => !(listPointInPerimeter.includes(elm))))
@@ -117,7 +119,7 @@ class GameBoard {
     }
     // check all the direccions around a point,
     // return the perimeter around a point or false if the perimeter is not valid
-    helperCheckPst(pointStr) {
+    static helperCheckPst(pointStr, listCoord) {
         let baseRow = Math.floor(pointStr / 10);
         let baseCol = pointStr % 10
 
@@ -148,15 +150,19 @@ class GameBoard {
             (pointStr + 1) + 10,
             (pointStr + 1) - 10
         ]
-        pointsAround.forEach(element => {
+        for (const element of pointsAround) {
             //check if it is a valid even if it is out of the board
             if (topes.includes(element)) {
                 total--;
-            } else if (this.listCoordinates[element] == false) {
+            } else if (listCoord[element] == false || listCoord.length == 0) {
                 partialPerimeter.push(element)
                 total--;
             }
-        });
+
+        }
+        // pointsAround.forEach(element => {
+
+        // });
         return total === 0 ? partialPerimeter : false;
     }
     //return a random number between min and max, both included

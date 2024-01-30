@@ -159,3 +159,8 @@ button:disabled {
 #btn_select_opt {
     padding-bottom: 10px;
 }
+
+div.dispo {
+    background-color: aqua;
+
+}

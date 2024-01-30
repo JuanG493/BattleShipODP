@@ -22,22 +22,16 @@ export default class Player {
     }
 
     setListClassShips() {
-
         for (const element of this.listShips) {
             if (!this.#listClassShips.includes(element.getClass())) {
                 let tempo = element.getClass();
                 this.#listClassShips.push(tempo)
             }
         }
-        // console.log(this.#listClassShips);
-        // for (const itr of this.#listClassShips) {
-        //     let tt = itr.splite("_")
-
-
-        // }
-
     }
     getListClass() {
+        this.#listClassShips = [];
+        this.setListClassShips();
         return this.#listClassShips
     }
     getTotalPoints() {
@@ -82,7 +76,7 @@ export default class Player {
         }
     }
 
-    // fill the array with the ships of random size (1 and 5)
+    // fill the array with the ships size (1 and 5)
     // or whith the specifc list
     setShips() {
         let listSizeShips = [1, 2, 3, 4, 5, 2, 3]
@@ -114,6 +108,13 @@ export default class Player {
     setMapPointsAttk(pto) {
         this.#mapPointsOfAttacked[pto] = true;
     }
+
+    updateShip(ship, replace) {
+        let nav = this.identifyShip(ship);
+        const navIndex = this.listShips.findIndex((elm) => elm === nav);
+        this.listShips[navIndex] = replace;
+    }
 }
+
 export { Player };
 // module.exports = Player;

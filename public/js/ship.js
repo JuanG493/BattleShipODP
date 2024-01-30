@@ -4,6 +4,7 @@ class Ship {
     #lenghtShip = 0;
     #type;
     #positions = [];
+    #spaceAround = [];
 
     constructor(lenght = this.#randomLength()) {
         this.#lenghtShip = lenght;
@@ -28,6 +29,12 @@ class Ship {
         const MIN = 1;
         const MAX = 5;
         return Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
+    }
+    setSpaceAround(listPointsAround) {
+        this.#spaceAround = listPointsAround;
+    }
+    getSpaceAround() {
+        return this.#spaceAround;
     }
 
     setPosition(listOfPositions) {

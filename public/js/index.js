@@ -239,6 +239,7 @@ function hablePanel() {
 
     //create the elements for drag
     makingNewDiv()
+
     controlDrag(player); //start here //..................................here draw
 
 
@@ -381,7 +382,7 @@ async function drawRemainPoints(playerPoints = player.totalPoints, oponetPoints 
 }
 
 function drawPointOfAttack(board, point) {
-    let div = board.querySelector(`div[value="${point}"]`)
+    let div = board.querySelector(`div[data-value="${point}"]`)
     // div.innerText = "X"
     div.innerHTML = "<img src='./images/diana.png'>"
     div.classList.add("hit");
@@ -415,7 +416,7 @@ async function playMachine(machineBoard, humanBoard) {
             } while (machineBoard.getMapPointAttk(point));
         }
         //select the point on the position board
-        let div = positionBoard.querySelector(`div[value="${point}"]`)
+        let div = positionBoard.querySelector(`div[data-value="${point}"]`)
         // to go a little slow
         await timeOut()
         drawPointOfAttack(positionBoard, point)
@@ -477,7 +478,7 @@ function positionShipsOn(player) {
 //draw the point (ship) in the board
 function marker(arrylist, className) {
     arrylist.forEach(elm => {
-        let tempo = document.querySelector(`div[value="${elm}"]`)
+        let tempo = document.querySelector(`div[data-value="${elm}"]`)
         // tempo.setAttribute('draggable', "true")
         tempo.classList.add(`${className}`)
         tempo.classList.add("ship")
@@ -500,14 +501,14 @@ function drawBasicBoard(targetBoard, y, x) {
             x.appendChild(sInd)
         }
         let square = document.createElement("div");
-        square.setAttribute("value", `${i}`);
+        square.setAttribute("data-value", `${i}`);
         targetBoard.appendChild(square);
         if (targetBoard != positionBoard) {
             square.classList.add("squareAttack")
         }
     }
 }
-//return a list of valid points around a point and add to board those elemnts
+//return a list of valid points around a point and add to the board those elemnts
 function serchNerbyPto(pointStr, listPtosAttaked, machineBoard) {
     let partialPerimeter = []
     //the 4 points around
