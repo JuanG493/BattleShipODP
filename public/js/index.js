@@ -1,6 +1,7 @@
 import './style.css';
 import Player from './player.js';
 import { makingNewDiv, controlDrag } from './dragControler.js';
+import { playMachine } from './machineLogic.js';
 
 
 import { handleCreateRoom, handleJointToGame, ready, readyToPlay, readyToStart } from './socketIOControl.js';
@@ -52,119 +53,6 @@ function setNameRoom(name) {
 function setIdOponent(id) {
     idOponent = id;
 }
-
-
-// //catch the id from the server
-// socket.on('id', (id) => {
-//     idPlayer = id;
-//     console.log("Your id:", idPlayer);
-// })
-
-
-// //let to create a room to play 
-// function handleCreateRoom() {
-//     nameGameRoom = inputNameRoom.value;
-
-//     const payload = {
-//         coordinates: player.board.listCoordinates,
-//         totalPoints: player.totalPoints
-//     }
-//     socket.emit('createRoom', nameGameRoom, idPlayer, payload, (response) => {
-//         if (response) {
-//             console.log(`Player: ${idPlayer} has joined room: ${nameGameRoom}`);
-//         }
-//     })
-// }
-
-// //let a partner to joint a room that have been created
-// async function handleJointToGame() {
-//     return new Promise((resolve, reject) => {
-//         let roomName = inputNameRoom.value
-//         socket.emit('joinRoom', roomName, idPlayer, (response) => {
-//             let res = response;
-//             resolve(res);
-//         })
-//     })
-// }
-
-
-// async function readyToStart() {
-//     const payload = {
-//         coordinates: player.board.listCoordinates,
-//         totalPoints: player.totalPoints
-//     }
-//     socket.emit('turns', nameGameRoom, idPlayer, payload)
-//     displayTurn.innerText = "OPPONENT TURN"
-// }
-// //recive the indication to star the game, is the pj that create the room (HOST)
-// socket.on('readyToPlay', (idOpt) => {
-//     state.innerText = "a contenden has joined to this game"
-//     idOponent = idOpt;
-//     displayTurn.innerText = "YOUR TURN"
-//     console.log("mi id:", idPlayer, "oponent id : ", idOponent);
-//     startAttack()
-// })
-
-// async function startAttack() {
-//     let cond = NaN;
-//     let pointTarget;
-//     //prevent to select a div that already was selected
-//     do {
-//         pointTarget = await allowedAttack()
-//         cond = parseInt(pointTarget) ? true : false;
-//     } while (!cond);
-//     socket.emit('gameHasStarted', pointTarget, idOponent, idPlayer, nameGameRoom)
-// }
-
-// socket.on('winner', (winner) => {
-//     if (winner == idPlayer) {
-//         displayTurn.innerText = "YOU ARE THE WINNER"
-//     } else {
-//         displayTurn.innerText = "YOU LOST"
-//     }
-// })
-
-// //draw the atack into the atackBoard
-// socket.on('drawAttackBoardPoint', (point, washit, restPtos) => {
-//     drawRemainPoints(restPtos[1], restPtos[0])
-//     drawPointOfAttack(attackBoard, point)
-//     if (washit) {
-//         displayTurn.innerText = "YOUR TURN"
-//         let div = attackBoard.querySelector(`div[value="${point}"]`)
-//         navHit(div)
-//     } else {
-//         displayTurn.innerText = "OPONENT TURN"
-//     }
-// })
-
-// //draw the atakk into the position board
-// socket.on('drawPositionBoardPoint', (point, wasHit, restPtos) => {
-//     drawRemainPoints(restPtos[0], restPtos[1])
-//     drawPointOfAttack(positionBoard, point)
-//     if (wasHit) {
-//         // displayTurn.innerText = "HOST TURN"
-//         displayTurn.innerText = "OPONENT TURN"
-//     } else {
-//         displayTurn.innerText = "YOUR TURN"
-//     }
-// })
-
-// socket.on("playing", () => {
-//     startAttack()
-// })
-
-// //let the player to play in his attack board for a turn
-// async function allowedAttack() {
-//     return new Promise((resolve, reject) => {
-//         function clickHandler(e) {
-//             let divTarget = e.target
-//             let pointTarget = divTarget.attributes[0].nodeValue;
-//             resolve(pointTarget)
-//         }
-//         attackBoard.addEventListener('click', clickHandler, { once: true })
-//     })
-// }
-
 
 function toggle(elemnt) {
     elemnt.classList.toggle("selected")
@@ -273,13 +161,9 @@ btnPlay.addEventListener("click", async () => {
         case "create":
             handleCreateRoom()
             state.innerText = "waiting for the oponent to join"
-            // socket.emit('readyToPlay', (nameGameRoom, player))
             readyToPlay(nameGameRoom, player);
-
             break;
         case "join":
-            // await readyToStart();
-            // socket.emit('readyToPlay', (nameGameRoom, player))
             ready();
             break;
         default:
@@ -405,64 +289,6 @@ function drawPointOfAttack(board, point) {
     div.classList.add("hit");
 }
 
-async function playMachine(machineBoard, humanBoard) {
-    let point;
-    let wasHIt;
-    let partialpoint
-    do {
-        //serch for a point around the last hit
-        let prevElemts = machineBoard.getLastGooPositionOfAtk();
-        //it is think that work after ther second iteration
-        if (wasHIt || prevElemts[0] != undefined) {
-            //while still good position take those
-            if (prevElemts.length > 0) {
-                partialpoint = machineBoard.board.getRandomInt(0, prevElemts.length - 1)
-                point = prevElemts[partialpoint];
-                machineBoard.removeAgoodPosition(point);
-            } else {
-                //surch for a good positions
-                let around = serchNerbyPto(point, machineBoard.getMapPointAttk(), machineBoard);
-                partialpoint = machineBoard.board.getRandomInt(0, around.length - 1)
-                point = around[partialpoint]
-                machineBoard.removeAgoodPosition(point);
-            }
-        } else {
-            do {
-                point = machineBoard.board.getRandomInt();
-                // prevent to select a point that alredy was selectec - is a hash map
-            } while (machineBoard.getMapPointAttk(point));
-        }
-        //select the point on the position board
-        let div = positionBoard.querySelector(`div[data-value="${point}"]`)
-        // to go a little slow
-        await timeOut()
-        drawPointOfAttack(positionBoard, point)
-        wasHIt = await checkHit(point, machineBoard, humanBoard)
-        if (wasHIt) {
-            navHit(div)
-            quitOusidePoints(point, machineBoard);
-            //adding the new good point to the list of good points
-            serchNerbyPto(point, machineBoard.getMapPointAttk(), machineBoard);
-        }
-        //save the point that was selected
-        machineBoard.setMapPointsAttk(point)
-        //clean the remain options for a point
-        cleanGoodPositions(machineBoard, machineBoard.getLastGooPositionOfAtk())
-    } while (wasHIt && humanBoard.totalPoints > 0);
-}
-
-function cleanGoodPositions(machineBoard, listPositiones) {
-    for (const position of listPositiones) {
-        if (machineBoard.getMapPointAttk(position)) {
-            machineBoard.removeAgoodPosition(position)
-        }
-    }
-}
-
-function timeOut(ms = 2000) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 function navHit(ship) {
     ship.classList.add("nav_hit")
 }
@@ -500,8 +326,6 @@ function marker(arrylist, className) {
         tempo.classList.add(`${className}`)
         tempo.classList.add("ship")
         // tempo.style.zIndex = "1";
-
-
     });
 }
 
@@ -525,57 +349,7 @@ function drawBasicBoard(targetBoard, y, x) {
         }
     }
 }
-//return a list of valid points around a point and add to the board those elemnts
-function serchNerbyPto(pointStr, listPtosAttaked, machineBoard) {
-    let partialPerimeter = []
-    //the 4 points around
-    let pointsAround = [
-        pointStr - 1,
-        pointStr + 1,
-        pointStr - 10,
-        pointStr + 10,
-    ]
-    let topesList = topes(pointStr)
-    pointsAround.forEach(element => {
-        if (listPtosAttaked[element] == undefined && !(topesList.includes(element))) {
-            partialPerimeter.push(element)
-        }
-    });
-    machineBoard.setLastGoodPositionsOfAtk(partialPerimeter);
-    return partialPerimeter
-}
-//identify that the points are valid
-function topes(pointStr) {
-    let baseRow = Math.floor(pointStr / 10);
-    let baseCol = pointStr % 10
-    let topes = []
-    if (baseCol == 9) {
-        topes.push(...[pointStr + 1, (pointStr - 10) + 1, (pointStr + 10) + 1])
-        // if the point is at the begining of the columns
-    } if (baseCol == 0) {
-        topes.push(...[pointStr - 1, (pointStr - 10) - 1, (pointStr + 10) - 1]);
-    } if (baseRow == 0) {
-        topes.push(...[pointStr - 10, (pointStr - 10) - 1, (pointStr - 10) + 1]);
-    } if (baseRow == 9) {
-        topes.push(...[pointStr + 10, (pointStr + 10) - 1, (pointStr + 10) + 1])
-    }
-    return topes
-}
 
-function quitOusidePoints(pointStr, machineBoard) {
-    let topesList = topes(pointStr)
-    let discountPoints = [
-        (pointStr - 1) + 10,
-        (pointStr - 1) - 10,
-        (pointStr + 1) + 10,
-        (pointStr + 1) - 10
-    ]
-    for (const pto of discountPoints) {
-        if (!topesList.includes(pto)) {
-            machineBoard.setMapPointsAttk(pto)
-        }
-    }
-}
 
 export {
     player,
@@ -593,4 +367,5 @@ export {
     drawRemainPoints,
     positionBoard,
     navHit,
+    checkHit,
 }
