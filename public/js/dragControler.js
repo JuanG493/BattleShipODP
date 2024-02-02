@@ -11,7 +11,7 @@ let newListOfNoAvailable = [];
 let newPositionHover = [];
 let shipInPjBoard;
 let listValuesShip;
-let permitido = false;
+let allowed = false;
 
 
 // ************************EVENTS OVER THE DESTINATION ZONE ***************************************************
@@ -21,19 +21,15 @@ function dragEnterHandlerDropZone(e) {
 
 }
 function dragOverHandlerDropZone(e) {
-    // console.dir(e.target);
     let partial = e.target;
-    console.log(e.target);
-
-    e.preventDefault()
-    if (permitido) {
+    if (allowed) {
+        e.preventDefault()
         // prevent to select as target the actual zone of the ship
         if (targetPointer != partial && partial != targetShipDraging) {
             targetPointer = partial;
             updateDispo();
             checkValidPosition(partial)
         }
-
     }
 }
 
@@ -59,8 +55,7 @@ function checkValidPosition(target) {
 }
 
 function dropped(e) {
-    // console.log(player.listShips);
-    // console.log("list values ship:", listValuesShip);
+    allowed = false;
     let newPositons = positionBoard.querySelectorAll(".dispo");
 
     //functionality: when drop over a not valid zone nothing happend
@@ -69,13 +64,16 @@ function dropped(e) {
         let oldClase = targetShipDraging.classList[0]
         let oldPositions = document.querySelectorAll(`.${oldClase}.ship`);
         for (const elm of oldPositions) {
+            // set the old nav position as available
+            // newListOfNoAvailable[elm.getAttribute("data-value")] = false;
+
+            //set the old nav position as available in the player list of coordinates
+            player.board.listCoordinates[elm.getAttribute("data-value")] = false;
+
             elm.classList.remove(`${oldClase}`, "ship")
             elm.style.position = null;
             if (elm.firstChild) {
-                // console.log(elm.firstChild);
                 elm.removeChild(elm.firstChild)
-                // console.log("tiene hijo", elm);
-
             }
         }
         //create the class with the new positions
@@ -83,14 +81,17 @@ function dropped(e) {
         for (const post of newPositionHover) {
             newClass += `_${post}`;
         }
-        for (const i of newPositons) {
-            i.classList.remove("dispo")
-            i.classList.add(newClass)
-            i.classList.add("ship")
-            // i.style.position = "relative";
-            // i.addEventListener("mouseenter", mouseenterHandler)
-            // i.addEventListener("mousedown", mousedownHandler)
+        for (const pst of newPositons) {
+            // console.log(i);
+            pst.classList.remove("dispo")
+            pst.classList.add(newClass)
+            pst.classList.add("ship")
 
+            //set the new nav position as not available
+            // newListOfNoAvailable[pst.getAttribute("data-value")] = true;
+
+            //set the new nav position as not available in the player list of coordinates
+            player.board.listCoordinates[pst.getAttribute("data-value")] = true;
         }
         //create the new nav
         let newShip = new Ship(newPositionHover.length);
@@ -105,6 +106,9 @@ function dropped(e) {
                 }
             }
         }
+        //set the new space around of the new nav as not available
+        // spaceArd.map((elm) => newListOfNoAvailable[elm] = true)
+
         newShip.setSpaceAround(spaceArd);
         //update th board of the player
         player.updateShip(valueTargetDiv, newShip);
@@ -128,26 +132,23 @@ function dropped(e) {
         // clarEventos()
         // console.log(player.listShips);
         // addEvents()
-        removeBigDivs()
+        removeBigDivs();
+        // console.log(newListOfNoAvailable);
         newListOfNoAvailable = []
+        makingNewDiv();
+        preDragEvents();
+        // console.log(player.board);
+
     }
 }
 
 function removeBigDivs() {
-    // let fathers = document.querySelectorAll()
-    console.log(player.getListClass());
     for (const cls of player.getListClass()) {
         let target = positionBoard.querySelector(`.${cls}`)
-        console.log(target);
         if (target.firstChild) {
             target.removeChild(target.firstChild)
         }
-        // console.log(target.firstChild);
-        // target.firstChild.remove();
-        // console.log(target);
     }
-
-
 }
 
 function clarEventos() {
@@ -162,15 +163,11 @@ function clarEventos() {
 
 //************************EVENTS OVER THE ELEMENT****************************************************
 function dragStartHandler(e) {
-    // console.dir(e.target);
     if (e.target.draggable) {
-        permitido = true
+        allowed = true;
     }
-    // targetShipDraging = this;
-    // console.log(this.attributes["class"]);
-    // let clasePositions = dragShipMoving
-
 }
+
 function dragEndHandler(e) {
     e.target.style.display = "none";
 }
@@ -180,41 +177,22 @@ function controlDrag() {
     positionBoard.addEventListener("dragover", dragOverHandlerDropZone);
     positionBoard.addEventListener("drop", dropped);
     positionBoard.addEventListener("dragstart", dragStartHandler);
+    preDragEvents();
+}
 
+function preDragEvents() {
     let positionShip = positionBoard.querySelectorAll('.ship');
     for (const shipYellow of positionShip) {
         shipYellow.addEventListener('mouseenter', mouseenterHandler, { once: true })
         shipYellow.addEventListener('mousedown', mousedownHandler, { once: true })
     }
-    // addDragendHandler()
-    // dragShipsOnBoard.forEach(itm => {
-    //     itm.addEventListener('dragend', dragEndHandler)
-    //     // itm.addEventListener('dragstart', dragStartHandler)
-    // })
 }
-// let dragShipsOnBoard = document.querySelectorAll('.dragShip');
-// function deleteDragHadler() {
-//     for (const ship of dragShipsOnBoard) {
-//         ship.removeEventListener('dragend', dragEndHandler);
-//     }
-// }
-// function dragendHandler() {
-//     for (const ship of dragShipsOnBoard) {
-//         console.log("aasdfasdfasdfasdfas");
-//         ship.addEventListener("dragend", dragEndHandler)
-//         // ship.removeEventListener('dragend',dragEndHandler);
-//     }
-// }
-
 
 
 function mouseenterHandler(e) {
     targetShipDraging = document.getElementById(`${this.classList[0]}`)
-    // console.log("target ship: ", targetShipDraging);
 }
 function mousedownHandler(e) {
-    // let dragship = document.getElementById(`${e.target.classList[0]}`);
-    // dragship.style.display = "block";
     valueTargetDiv = e.target.getAttribute('data-value')
     targetShipDraging.style.display = "block"
     updatListOfNoAvailable();
@@ -227,11 +205,11 @@ function updatListOfNoAvailable() {
     let listNavs = player.listShips;
 
     // add the space around of the all ships but not the actual target
-    for (const i of listNavs) {
-        if (i != shipInPjBoard) {
-            let spaceArd = i.getSpaceAround();
-            for (const j of spaceArd) {
-                newListOfNoAvailable[j] = true;
+    for (const nav of listNavs) {
+        if (nav != shipInPjBoard) {
+            let spaceArd = nav.getSpaceAround()
+            for (const point of spaceArd) {
+                newListOfNoAvailable[point] = true;
             }
         }
     }
