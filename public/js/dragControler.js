@@ -16,19 +16,15 @@ let allowed = false;
 
 // ************************EVENTS OVER THE DESTINATION ZONE ***************************************************
 
-function dragEnterHandlerDropZone(e) {
-    // e.preventDefault()
-
-}
 function dragOverHandlerDropZone(e) {
     let partial = e.target;
     if (allowed) {
         e.preventDefault()
         // prevent to select as target the actual zone of the ship
         if (targetPointer != partial && partial != targetShipDraging) {
-            targetPointer = partial;
             updateDispo();
             checkValidPosition(partial)
+            targetPointer = partial;
         }
     }
 }
@@ -60,13 +56,10 @@ function dropped(e) {
 
     //functionality: when drop over a not valid zone nothing happend
     if (newPositons.length > 0) {
-        //remove the prev-position on board
+        //remove the old positions on board
         let oldClase = targetShipDraging.classList[0]
         let oldPositions = document.querySelectorAll(`.${oldClase}.ship`);
         for (const elm of oldPositions) {
-            // set the old nav position as available
-            // newListOfNoAvailable[elm.getAttribute("data-value")] = false;
-
             //set the old nav position as available in the player list of coordinates
             player.board.listCoordinates[elm.getAttribute("data-value")] = false;
 
@@ -112,33 +105,10 @@ function dropped(e) {
         newShip.setSpaceAround(spaceArd);
         //update th board of the player
         player.updateShip(valueTargetDiv, newShip);
-
-        // for (const i of listValuesShip) {
-        //     const partial = document.querySelector(`div[data-value="${i}"]`);
-        //     partial.classList.remove(`${targetShipDraging.classList[0]}`);
-        //     partial.classList.remove("ship");
-
-        //     if (partial.children.length == 1) {
-        //         partial.firstChild.remove()
-
-        //         // let divChild = partial.children[0];
-        //         // let target = positionBoard.querySelector(`.${newClass}`)
-        //         // divChild.classList.replace(`${targetShipDraging.classList[0]}`, newClass)
-        //         // divChild.id = newClass;
-        //         // divChild.values = `${newPositionHover}`
-        //         // target.appendChild(divChild);
-        //     }
-        // }
-        // clarEventos()
-        // console.log(player.listShips);
-        // addEvents()
         removeBigDivs();
-        // console.log(newListOfNoAvailable);
         newListOfNoAvailable = []
         makingNewDiv();
         preDragEvents();
-        // console.log(player.board);
-
     }
 }
 
@@ -173,7 +143,7 @@ function dragEndHandler(e) {
 }
 
 function controlDrag() {
-    positionBoard.addEventListener("dragenter", dragEnterHandlerDropZone);
+    // positionBoard.addEventListener("dragenter", dragEnterHandlerDropZone);
     positionBoard.addEventListener("dragover", dragOverHandlerDropZone);
     positionBoard.addEventListener("drop", dropped);
     positionBoard.addEventListener("dragstart", dragStartHandler);
@@ -183,8 +153,8 @@ function controlDrag() {
 function preDragEvents() {
     let positionShip = positionBoard.querySelectorAll('.ship');
     for (const shipYellow of positionShip) {
-        shipYellow.addEventListener('mouseenter', mouseenterHandler, { once: true })
-        shipYellow.addEventListener('mousedown', mousedownHandler, { once: true })
+        shipYellow.addEventListener('mouseenter', mouseenterHandler)
+        shipYellow.addEventListener('mousedown', mousedownHandler)
     }
 }
 
@@ -241,7 +211,9 @@ function makingNewDiv() {
         listOfCoordinates.sort((a, b) => a - b);
 
         let sizeDiv = listOfCoordinates.length;
-        let direccion = listOfCoordinates.length > 1 ? ((+listOfCoordinates[1] - (+listOfCoordinates[0])) == 1 ? "hrz" : "vert") : "none"
+        let direccion = listOfCoordinates.length > 1 ?
+            ((+listOfCoordinates[1] - (+listOfCoordinates[0])) == 1 ? "hrz" : "vert") :
+            "none"
 
         newDiv.classList.add(`${cls}`);
         newDiv.classList.add('dragShip');

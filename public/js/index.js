@@ -3,7 +3,9 @@ import Player from './player.js';
 import { makingNewDiv, controlDrag } from './dragControler.js';
 
 
-const socket = io(); //here the domain 
+import { handleCreateRoom, handleJointToGame, ready, readyToPlay, readyToStart } from './socketIOControl.js';
+
+// const socket = io(); //here the domain 
 
 
 let positionBoard = document.querySelector("#board_pst");
@@ -40,116 +42,128 @@ let nameGameRoom = null;
 let idPlayer = null;
 let machineAsOponent = null;
 
-//catch the id from the server
-socket.on('id', (id) => {
+function setID(id) {
     idPlayer = id;
-    console.log("Your id:", idPlayer);
-})
-
-
-//let to create a room to play 
-function handleCreateRoom() {
-    nameGameRoom = inputNameRoom.value;
-
-    const payload = {
-        coordinates: player.board.listCoordinates,
-        totalPoints: player.totalPoints
-    }
-    socket.emit('createRoom', nameGameRoom, idPlayer, payload, (response) => {
-        if (response) {
-            console.log(`Player: ${idPlayer} has joined room: ${nameGameRoom}`);
-        }
-    })
 }
+function setNameRoom(name) {
+    nameGameRoom = name
 
-//let a partner to joint a room that have been created
-async function handleJointToGame() {
-    return new Promise((resolve, reject) => {
-        let roomName = inputNameRoom.value
-        socket.emit('joinRoom', roomName, idPlayer, (response) => {
-            let res = response;
-            resolve(res);
-        })
-    })
+}
+function setIdOponent(id) {
+    idOponent = id;
 }
 
 
-async function readyToStart() {
-    const payload = {
-        coordinates: player.board.listCoordinates,
-        totalPoints: player.totalPoints
-    }
-    socket.emit('turns', nameGameRoom, idPlayer, payload)
-    displayTurn.innerText = "OPPONENT TURN"
-}
-//recive the indication to star the game, is the pj that create the room (HOST)
-socket.on('readyToPlay', (idOpt) => {
-    state.innerText = "a contenden has joined to this game"
-    idOponent = idOpt;
-    displayTurn.innerText = "YOUR TURN"
-    console.log("mi id:", idPlayer, "oponent id : ", idOponent);
-    startAttack()
-})
+// //catch the id from the server
+// socket.on('id', (id) => {
+//     idPlayer = id;
+//     console.log("Your id:", idPlayer);
+// })
 
-async function startAttack() {
-    let cond = NaN;
-    let pointTarget;
-    //prevent to select a div that already was selected
-    do {
-        pointTarget = await allowedAttack()
-        cond = parseInt(pointTarget) ? true : false;
-    } while (!cond);
-    socket.emit('gameHasStarted', pointTarget, idOponent, idPlayer, nameGameRoom)
-}
 
-socket.on('winner', (winner) => {
-    if (winner == idPlayer) {
-        displayTurn.innerText = "YOU ARE THE WINNER"
-    } else {
-        displayTurn.innerText = "YOU LOST"
-    }
-})
+// //let to create a room to play 
+// function handleCreateRoom() {
+//     nameGameRoom = inputNameRoom.value;
 
-//draw the atack into the atackBoard
-socket.on('drawAttackBoardPoint', (point, washit, restPtos) => {
-    drawRemainPoints(restPtos[1], restPtos[0])
-    drawPointOfAttack(attackBoard, point)
-    if (washit) {
-        displayTurn.innerText = "YOUR TURN"
-        let div = attackBoard.querySelector(`div[value="${point}"]`)
-        navHit(div)
-    } else {
-        displayTurn.innerText = "OPONENT TURN"
-    }
-})
+//     const payload = {
+//         coordinates: player.board.listCoordinates,
+//         totalPoints: player.totalPoints
+//     }
+//     socket.emit('createRoom', nameGameRoom, idPlayer, payload, (response) => {
+//         if (response) {
+//             console.log(`Player: ${idPlayer} has joined room: ${nameGameRoom}`);
+//         }
+//     })
+// }
 
-//draw the atakk into the position board
-socket.on('drawPositionBoardPoint', (point, wasHit, restPtos) => {
-    drawRemainPoints(restPtos[0], restPtos[1])
-    drawPointOfAttack(positionBoard, point)
-    if (wasHit) {
-        // displayTurn.innerText = "HOST TURN"
-        displayTurn.innerText = "OPONENT TURN"
-    } else {
-        displayTurn.innerText = "YOUR TURN"
-    }
-})
+// //let a partner to joint a room that have been created
+// async function handleJointToGame() {
+//     return new Promise((resolve, reject) => {
+//         let roomName = inputNameRoom.value
+//         socket.emit('joinRoom', roomName, idPlayer, (response) => {
+//             let res = response;
+//             resolve(res);
+//         })
+//     })
+// }
 
-socket.on("playing", () => {
-    startAttack()
-})
 
-//let the player to play in his attack board for a turn
-async function allowedAttack() {
-    return new Promise((resolve, reject) => {
-        function clickHandler(e) {
-            let divTarget = e.target
-            let pointTarget = divTarget.attributes[0].nodeValue;
-            resolve(pointTarget)
-        }
-        attackBoard.addEventListener('click', clickHandler, { once: true })
-    })
-}
+// async function readyToStart() {
+//     const payload = {
+//         coordinates: player.board.listCoordinates,
+//         totalPoints: player.totalPoints
+//     }
+//     socket.emit('turns', nameGameRoom, idPlayer, payload)
+//     displayTurn.innerText = "OPPONENT TURN"
+// }
+// //recive the indication to star the game, is the pj that create the room (HOST)
+// socket.on('readyToPlay', (idOpt) => {
+//     state.innerText = "a contenden has joined to this game"
+//     idOponent = idOpt;
+//     displayTurn.innerText = "YOUR TURN"
+//     console.log("mi id:", idPlayer, "oponent id : ", idOponent);
+//     startAttack()
+// })
+
+// async function startAttack() {
+//     let cond = NaN;
+//     let pointTarget;
+//     //prevent to select a div that already was selected
+//     do {
+//         pointTarget = await allowedAttack()
+//         cond = parseInt(pointTarget) ? true : false;
+//     } while (!cond);
+//     socket.emit('gameHasStarted', pointTarget, idOponent, idPlayer, nameGameRoom)
+// }
+
+// socket.on('winner', (winner) => {
+//     if (winner == idPlayer) {
+//         displayTurn.innerText = "YOU ARE THE WINNER"
+//     } else {
+//         displayTurn.innerText = "YOU LOST"
+//     }
+// })
+
+// //draw the atack into the atackBoard
+// socket.on('drawAttackBoardPoint', (point, washit, restPtos) => {
+//     drawRemainPoints(restPtos[1], restPtos[0])
+//     drawPointOfAttack(attackBoard, point)
+//     if (washit) {
+//         displayTurn.innerText = "YOUR TURN"
+//         let div = attackBoard.querySelector(`div[value="${point}"]`)
+//         navHit(div)
+//     } else {
+//         displayTurn.innerText = "OPONENT TURN"
+//     }
+// })
+
+// //draw the atakk into the position board
+// socket.on('drawPositionBoardPoint', (point, wasHit, restPtos) => {
+//     drawRemainPoints(restPtos[0], restPtos[1])
+//     drawPointOfAttack(positionBoard, point)
+//     if (wasHit) {
+//         // displayTurn.innerText = "HOST TURN"
+//         displayTurn.innerText = "OPONENT TURN"
+//     } else {
+//         displayTurn.innerText = "YOUR TURN"
+//     }
+// })
+
+// socket.on("playing", () => {
+//     startAttack()
+// })
+
+// //let the player to play in his attack board for a turn
+// async function allowedAttack() {
+//     return new Promise((resolve, reject) => {
+//         function clickHandler(e) {
+//             let divTarget = e.target
+//             let pointTarget = divTarget.attributes[0].nodeValue;
+//             resolve(pointTarget)
+//         }
+//         attackBoard.addEventListener('click', clickHandler, { once: true })
+//     })
+// }
 
 
 function toggle(elemnt) {
@@ -199,14 +213,14 @@ btnMakeArmy.addEventListener("click", async () => {
     } else {
         if (selectionOponentMenu === "create") {
             if (inputNameRoom.value == "") {
-                alert("Please enter a room name firs")
+                alert("Please enter a room name first")
             } else {
                 hablePanel()
             }
 
         } else if (selectionOponentMenu === "join") {
             if (inputNameRoom.value == "") {
-                alert("Please enter a room name firs")
+                alert("Please enter a room name first")
             } else {
                 let response = await handleJointToGame();
                 // console.log(response);
@@ -259,11 +273,14 @@ btnPlay.addEventListener("click", async () => {
         case "create":
             handleCreateRoom()
             state.innerText = "waiting for the oponent to join"
-            socket.emit('readyToPlay', (nameGameRoom, player))
+            // socket.emit('readyToPlay', (nameGameRoom, player))
+            readyToPlay(nameGameRoom, player);
+
             break;
         case "join":
-            await readyToStart()
-            socket.emit('readyToPlay', (nameGameRoom, player))
+            // await readyToStart();
+            // socket.emit('readyToPlay', (nameGameRoom, player))
+            ready();
             break;
         default:
             break;
@@ -560,4 +577,20 @@ function quitOusidePoints(pointStr, machineBoard) {
     }
 }
 
-export { player }
+export {
+    player,
+    setID,
+    idPlayer,
+    idOponent,
+    setNameRoom,
+    nameGameRoom,
+    attackBoard,
+    inputNameRoom,
+    state,
+    displayTurn,
+    setIdOponent,
+    drawPointOfAttack,
+    drawRemainPoints,
+    positionBoard,
+    navHit,
+}
