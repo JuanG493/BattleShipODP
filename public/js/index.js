@@ -2,6 +2,7 @@ import './style.css';
 import Player from './player.js';
 import { makingNewDiv, controlDrag } from './dragControler.js';
 import { playMachine } from './machineLogic.js';
+// import { allowedAttack } from './socketIOControl.js';
 
 
 import { handleCreateRoom, handleJointToGame, ready, readyToPlay, readyToStart } from './socketIOControl.js';
@@ -92,6 +93,7 @@ btnRandom.addEventListener("click", () => {
     started()
     player = new Player(gameModeSelected());
     positionShipsOn(player)
+    controlDrag();
 })
 
 btnMakeArmy.addEventListener("click", async () => {
@@ -139,10 +141,9 @@ function hablePanel() {
     player = new Player(gameModeSelected());
     positionShipsOn(player)
 
-    //create the elements for drag
-    makingNewDiv()
 
-    controlDrag(player); //start here //..................................here draw
+
+    controlDrag(); //start here //..................................here draw
 
 
     disabledHtmlBtn(btnMakeArmy, true)
@@ -238,29 +239,23 @@ function disabledHtmlBtn(btn, toggle) {
 //true -> player || false -> machine
 async function turns(pjCurrentTurn, pjTarget, turn) {
     drawRemainPoints()
-    if (turn) {
-        displayTurn.innerText = "Human Turn"
-    } else {
-        displayTurn.innerText = "Machine Turn"
-    }
+
     //check if it´s posible play
     if (pjCurrentTurn.totalPoints > 0 && pjTarget.totalPoints > 0) {
         if (turn) {
-            attackBoard.addEventListener("click", async e => {
-                let divTarget = e.target
-                // mark in the map
-                let pointTarget = divTarget.attributes[0].nodeValue;
-                drawPointOfAttack(attackBoard, pointTarget)
-                let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
-                if (wasHit) {
-                    navHit(divTarget)
-                    //the actual PJ continue with the turn
-                    turns(pjCurrentTurn, pjTarget, true)
-                } else {
-                    turns(pjTarget, pjCurrentTurn, false)
-                }
-            }, { once: true })
+            displayTurn.innerText = "Human Turn"
+            let pointTarget = await attack()
+            drawPointOfAttack(attackBoard, pointTarget)
+            let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
+            if (wasHit) {
+                navHit(divTarget)
+                //the actual PJ continue with the turn
+                turns(pjCurrentTurn, pjTarget, true)
+            } else {
+                turns(pjTarget, pjCurrentTurn, false)
+            }
         } else {
+            displayTurn.innerText = "Machine Turn"
             await playMachine(pjCurrentTurn, pjTarget);
             turns(pjTarget, pjCurrentTurn, true)
         }
@@ -268,7 +263,28 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
         gameOver();
     }
 }
+async function attack() {
+    let validTargetPto;
+    while (!validTargetPto) {
+        let selectedPto = await allowedAttack();
+        if (selectedPto >= 0 && selectedPto <= 99) {
+            validTargetPto = selectedPto;
+        }
+    }
+    return validTargetPto
+}
 
+//let the player to play in his attack board for a turn
+export async function allowedAttack() {
+    return new Promise((resolve, reject) => {
+        function clickHandler(e) {
+            let divTarget = e.target
+            let pointTarget = divTarget.attributes[0].nodeValue;
+            resolve(pointTarget)
+        }
+        attackBoard.addEventListener('click', clickHandler, { once: true })
+    })
+}
 
 function gameOver() {
     console.log("game Over");
@@ -368,4 +384,5 @@ export {
     positionBoard,
     navHit,
     checkHit,
+    attack
 }

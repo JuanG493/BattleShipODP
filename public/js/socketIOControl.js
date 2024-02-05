@@ -13,7 +13,8 @@ import {
     drawPointOfAttack,
     drawRemainPoints,
     positionBoard,
-    navHit
+    navHit,
+    attack
 } from './index.js'
 
 const socket = io(); //here the domain 
@@ -73,21 +74,14 @@ export async function readyToStart() {
 //recive the indication to star the game, is the pj that create the room (HOST)
 socket.on('readyToPlay', (idOpt) => {
     state.innerText = "a contenden has joined to this game"
-    // idOponent = idOpt;
     setIdOponent(idOpt)
     displayTurn.innerText = "YOUR TURN"
     console.log("mi id:", idPlayer, "oponent id : ", idOponent);
-    startAttack()
+    startAttack();
 })
 
 async function startAttack() {
-    let cond = NaN;
-    let pointTarget;
-    //prevent to select a div that already was selected
-    do {
-        pointTarget = await allowedAttack()
-        cond = parseInt(pointTarget) ? true : false;
-    } while (!cond);
+    let pointTarget = await attack();
     socket.emit('gameHasStarted', pointTarget, idOponent, idPlayer, nameGameRoom)
 }
 
@@ -127,15 +121,3 @@ socket.on('drawPositionBoardPoint', (point, wasHit, restPtos) => {
 socket.on("playing", () => {
     startAttack()
 })
-
-//let the player to play in his attack board for a turn
-async function allowedAttack() {
-    return new Promise((resolve, reject) => {
-        function clickHandler(e) {
-            let divTarget = e.target
-            let pointTarget = divTarget.attributes[0].nodeValue;
-            resolve(pointTarget)
-        }
-        attackBoard.addEventListener('click', clickHandler, { once: true })
-    })
-}

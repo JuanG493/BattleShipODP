@@ -143,6 +143,9 @@ function dragEndHandler(e) {
 }
 
 function controlDrag() {
+    //create the elements for drag
+    makingNewDiv()
+
     // positionBoard.addEventListener("dragenter", dragEnterHandlerDropZone);
     positionBoard.addEventListener("dragover", dragOverHandlerDropZone);
     positionBoard.addEventListener("drop", dropped);
