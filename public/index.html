@@ -5,13 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geostar&family=Rubik+Iso&display=swap');
+    </style>
 
 </head>
 
 <body>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script defer src="../dist/bundle.js"></script>
-    <header></header>
+    <header>
+        <h1>battle Ship</h1>
+    </header>
     <main>
         <div id="container">
 
@@ -48,40 +53,47 @@
 
         <section id="show_ships"></section>
         <section id="buttons_play">
-            <fieldset id="mode">
-                <legend>Mode</legend>
-                <input type="radio" class="md" id="normal" name="mode" value="N" checked />
-                <label for="normal">Normal</label><br />
+            <div id="mode_select">
 
-                <input type="radio" class="md" id="russian" name="mode" value="R" />
-                <label for="russian">Russian</label><br />
+                <fieldset id="mode">
+                    <legend>Mode</legend>
+                    <div>
 
-                <input type="radio" id="hardcore" class="md" name="mode" value="H" />
-                <label for="hardcore">HardCore</label>
-            </fieldset>
-            <fieldset id="game">
-                <legend>Select Oponnent</legend>
-                <div id="btn_select_opt">
-                    <button id="vs_machine" value="machine">vs Machine</button>
-                    <button id="vs_friend" value="create">crete game</button>
-                    <button id="join_game" value="join">join to game</button>
-
-                </div>
-
-                <div id="nameRoom" class="selected">
-                    <label for="nameRoom_inp">Enter the room name:</label>
-                    <input id="nameRoom_inp" type="text">
-
-                </div>
-            </fieldset>
+                        <input type="radio" class="md" id="normal" name="mode" value="N" checked />
+                        <label for="normal">Normal</label><br />
+                    </div>
+                    <div>
+                        <input type="radio" class="md" id="russian" name="mode" value="R" />
+                        <label for="russian">Russian</label><br />
+                    </div>
+                    <div>
+                        <input type="radio" id="hardcore" class="md" name="mode" value="H" />
+                        <label for="hardcore">HardCore</label>
+                    </div>
+                </fieldset>
+                <fieldset id="game">
+                    <legend>Select Oponnent</legend>
+                    <div id="btn_select_opt">
+                        <button id="vs_machine" value="machine">vs Machine</button>
+                        <button id="vs_friend" value="create">crete game</button>
+                        <button id="join_game" value="join">join to game</button>
+                    </div>
+                    <div id="nameRoom" class="selected">
+                        <label for="nameRoom_inp">Enter the room name:</label>
+                        <input id="nameRoom_inp" type="text">
+                    </div>
+                </fieldset>
 
             </div>
-            <button id="make_army">Position Army</button>
-            <button id="play" disabled>Play</button>
-            <button id="rand" class="selected">Random</button>
+            <div id="set_buttons">
 
-            <button id="restar" class="selected">Restar</button>
-            <button id="leave" class="selected">Leave</button>
+                <button id="make_army">Position Army</button>
+                <button id="play" disabled>Play</button>
+                <button id="rand" class="selected">Random</button>
+
+                <button id="restar" class="selected">Restar</button>
+                <button id="leave" class="selected">Leave</button>
+            </div>
         </section>
         <section>
             <div id="state"></div>

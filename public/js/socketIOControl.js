@@ -51,7 +51,7 @@ export function handleCreateRoom() {
     })
 }
 
-//let a partner to joint a room that have been created
+//let a partner to joint a room that had been created
 export async function handleJointToGame() {
     return new Promise((resolve, reject) => {
         let roomName = inputNameRoom.value

@@ -140,11 +140,7 @@ btnMakeArmy.addEventListener("click", async () => {
 function hablePanel() {
     player = new Player(gameModeSelected());
     positionShipsOn(player)
-
-
-
     controlDrag(); //start here //..................................here draw
-
 
     disabledHtmlBtn(btnMakeArmy, true)
     disabledHtmlBtn(btnPlay, false)

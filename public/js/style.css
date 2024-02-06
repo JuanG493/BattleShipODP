@@ -1,24 +1,83 @@
 * {
     box-sizing: border-box;
+    font-family: 'Rubik Iso', system-ui;
+    padding: 0;
+    margin: 0;
 }
 
+:root {
+    --main-oragange: #ff9a00;
+    --dark-orange: #ff5d00;
+    --main-blue: #0065ff;
+    --light-blue: #00a2ff;
+    --main-black: #000000b2;
+    --dark-black: #000000e7;
+}
+
+html {
+    /* height: 100%; */
+}
+
+body {
+    /* min-height: 100%; */
+    /* position: relative; */
+}
+
+/* header section */
+
+header {
+    background-color: var(--light-orange);
+    text-align: center;
+    border-bottom: 5px solid var(--dark-orange);
+    padding: 2%;
+    margin-bottom: 1%;
+    background-color: var(--dark-black);
+}
+
+header h1 {
+    text-transform: uppercase;
+    color: var(--dark-orange);
+    font-weight: bold;
+    letter-spacing: 1cap;
+}
+
+/* main */
+
+
+/* container*/
+
 #container {
+    background-color: var(--dark-black);
     display: grid;
+    padding: 2% 0%;
     grid-template-columns: 3fr 1fr 3fr;
     justify-content: space-around;
     text-align: center;
     text-transform: uppercase;
-    /* justify-content: center; */
     align-items: center;
     justify-items: center;
-
+    color: var(--dark-orange);
+    border-bottom: 5px solid var(--dark-orange);
+    letter-spacing: 0.5cap;
 }
 
+#container h4 {
+    padding: 4% 0;
+}
+
+section h3 {
+    margin-bottom: 2%;
+}
+
+input[type=radio] {
+    accent-color: var(--dark-orange);
+}
 
 
 #board_pst,
 #board_atk {
-    border: 1px solid black;
+    background-color: var(--blue);
+    /* border: 1px solid black; */
     /* border-collapse: collapse; */
     /* width: 500px; */
     /* height: 500px; */
@@ -34,12 +93,10 @@
 
 #board_pst div,
 #board_atk div {
-    /* width: 50px; */
     width: 100%;
-    /* height: 50px; */
-    border: 1px solid black;
+    /* border: 1px solid black; */
+    border: 1px solid var(--main-oragange);
     margin: 0 -10px 0 0;
-    /* background-color: blueviolet; */
 }
 
 .ship {
@@ -59,6 +116,10 @@
     display: flex;
     /* width: 400px; */
     text-align: center;
+    /* color: var(--dark-orange); */
+    /* color: white; */
+    /* font-weight: bolder; */
+    padding: 1%;
     /* text-transform: uppercase; */
 }
 
@@ -76,6 +137,9 @@
     margin-right: 5px;
     /* justify-content: center; */
     align-content: center;
+    /* color: var(--dark-orange); */
+    padding: 1%;
+    /* font-weight: bolder; */
 
 }
 
@@ -154,13 +218,72 @@ button:disabled {
     height: 80px;
 }
 
-
-
 #btn_select_opt {
     padding-bottom: 10px;
 }
 
 div.dispo {
-    background-color: aqua;
+    background-color: var(--light-blue);
+}
 
+/* panel btns */
+#buttons_play {
+    margin: 1% 0;
+    background-color: var(--dark-black);
+    color: var(--dark-orange);
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    border: 0;
+    padding: 2% 0;
+    border-bottom: 5px solid var(--dark-orange);
+    /* margin-bottom: 10px; */
+}
+
+#mode_select {
+    /* height: 50%; */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    padding: 2% 1%;
+}
+
+#mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1%;
+    width: 40%;
+    justify-content: space-evenly;
+}
+
+
+
+#game {
+    width: 60%;
+    display: flex;
+    align-items: center;
+    /* justify-content: space-evenly; */
+}
+
+input[type=radio] {
+    accent-color: var(--dark-orange);
+}
+
+button {
+    background-color: var(--main-oragange);
+    color: black;
+    padding: 5px;
+    border-radius: 25px;
+}
+
+/* footer */
+footer {
+    position: absolute;
+    /* position: fixed; */
+    width: 100%;
+    height: 50px;
+    background-color: var(--dark-black);
 }
