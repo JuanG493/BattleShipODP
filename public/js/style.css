@@ -14,13 +14,10 @@
     --dark-black: #000000e7;
 }
 
-html {
-    /* height: 100%; */
-}
 
 body {
-    /* min-height: 100%; */
-    /* position: relative; */
+    background-color: var(--light-blue);
+    /* display: ; */
 }
 
 /* header section */
@@ -28,28 +25,60 @@ body {
 header {
     background-color: var(--light-orange);
     text-align: center;
-    border-bottom: 5px solid var(--dark-orange);
+    border-bottom: 5px solid var(--main-blue);
     padding: 2%;
-    margin-bottom: 1%;
+    margin-bottom: 5px;
     background-color: var(--dark-black);
 }
 
-header h1 {
+h1 {
     text-transform: uppercase;
+    font-size: 4em;
     color: var(--dark-orange);
     font-weight: bold;
     letter-spacing: 1cap;
+    text-orientation: upright;
+    justify-self: center;
+    align-self: center;
+    writing-mode: vertical-lr;
+    text-shadow: var(--main-oragange) 1px 0 20px;
 }
 
+
 /* main */
+main {
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+    grid-template-rows: 3fr 2fr;
+}
+
+#lh1,
+#rh1 {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    background-color: var(--dark-black);
+}
+
+#lh1 {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+}
+
+#rh1 {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+}
 
 
 /* container*/
 
 #container {
+    /* grid-row-start: 1; */
+    grid-column: 2;
     background-color: var(--dark-black);
     display: grid;
-    padding: 2% 0%;
+    padding: 2% 2%;
     grid-template-columns: 3fr 1fr 3fr;
     justify-content: space-around;
     text-align: center;
@@ -57,8 +86,9 @@ header h1 {
     align-items: center;
     justify-items: center;
     color: var(--dark-orange);
-    border-bottom: 5px solid var(--dark-orange);
     letter-spacing: 0.5cap;
+    margin-bottom: 5px;
+    border-bottom: 5px solid var(--main-blue);
 }
 
 #container h4 {
@@ -77,33 +107,20 @@ input[type=radio] {
 #board_pst,
 #board_atk {
     background-color: var(--blue);
-    /* border: 1px solid black; */
-    /* border-collapse: collapse; */
-    /* width: 500px; */
-    /* height: 500px; */
-
     display: grid;
     grid-template-columns: repeat(10, 40px);
     grid-template-rows: repeat(10, 40px);
     flex-wrap: wrap;
-    /* grid-gap:10px; */
-    /* width: 100%;
-    height: 100%; */
 }
 
 #board_pst div,
 #board_atk div {
     width: 100%;
-    /* border: 1px solid black; */
-    border: 1px solid var(--main-oragange);
-    margin: 0 -10px 0 0;
+    border: 1px solid var(--light-blue);
 }
 
 .ship {
-    background-color: yellow;
-    /* border-radius: 5px; */
-    /* border: 2px solid red; */
-    /* box-shadow:0 0 0 10px palegreen;  */
+    background-color: white;
 
 }
 
@@ -114,13 +131,8 @@ input[type=radio] {
 .pst_ind_right,
 .atk_ind_right {
     display: flex;
-    /* width: 400px; */
     text-align: center;
-    /* color: var(--dark-orange); */
-    /* color: white; */
-    /* font-weight: bolder; */
     padding: 1%;
-    /* text-transform: uppercase; */
 }
 
 .pst_ind_right div,
@@ -132,14 +144,10 @@ input[type=radio] {
 .atk_ind_left {
     display: flex;
     flex-direction: column;
-    /* height: 400px; */
     margin-top: 4%;
     margin-right: 5px;
-    /* justify-content: center; */
     align-content: center;
-    /* color: var(--dark-orange); */
     padding: 1%;
-    /* font-weight: bolder; */
 
 }
 
@@ -147,8 +155,6 @@ input[type=radio] {
 .atk_ind_left div {
     width: 100%;
     height: 100%;
-    /* justify-content: 100px; */
-    /* padding-top: 10px; */
 }
 
 .square {
@@ -172,14 +178,15 @@ input[type=radio] {
     text-align: center;
     font-size: xx-large;
     margin: 0;
-    /* background-image: url(images/redPoint.png); */
     image-resolution: 10px 10px;
-    /* background-color: red; */
 }
 
 .nav_hit {
     background-color: rgba(255, 0, 0, 0.39);
-    /* border: 1px solid red; */
+}
+
+div.dragShip {
+    border: 5px solid red;
 }
 
 img {
@@ -190,15 +197,7 @@ img {
 #display_turn {
     width: 100px;
     height: 100px;
-    /* background-color: red; */
     font-weight: bold;
-
-}
-
-button:disabled {
-    border: 1px solid #999999;
-    background-color: #cccccc;
-    color: #666666;
 }
 
 .selected {
@@ -210,9 +209,6 @@ button:disabled {
     justify-items: center;
 }
 
-#state {
-    font-size: x-large;
-}
 
 #game {
     height: 80px;
@@ -226,24 +222,19 @@ div.dispo {
     background-color: var(--light-blue);
 }
 
-/* panel btns */
+/* panel btns container */
 #buttons_play {
-    margin: 1% 0;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr;
     background-color: var(--dark-black);
     color: var(--dark-orange);
-    /* display: flex; */
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    border: 0;
-    padding: 2% 0;
-    border-bottom: 5px solid var(--dark-orange);
-    /* margin-bottom: 10px; */
+    justify-items: center;
+    align-items: start;
+    padding: 4% 0;
 }
 
 #mode_select {
-    /* height: 50%; */
-    color: white;
     display: flex;
     justify-content: center;
     align-content: center;
@@ -253,37 +244,108 @@ div.dispo {
 #mode {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     padding: 1%;
-    width: 40%;
-    justify-content: space-evenly;
+    gap: 1px;
 }
 
+#mode div {
+    padding: 2px 0;
+}
 
-
+/* container selec oponent */
 #game {
-    width: 60%;
-    display: flex;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
     align-items: center;
-    /* justify-content: space-evenly; */
+    text-align: center;
+    width: 100%;
+}
+
+#btn_selct_opt {
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+#nameRoom {
+    grid-row-start: 2;
+    padding-top: 5px;
+}
+
+#nameRoom_inp {
+    /* background-color: #0065ff; */
+    border: solid 1px var(--light-blue);
+}
+
+#set_buttons {
+    text-align: center;
+}
+
+#btn_select_opt h2,
+#set_buttons h2,
+#mode h2 {
+    padding-bottom: 4%;
 }
 
 input[type=radio] {
-    accent-color: var(--dark-orange);
+    accent-color: var(--main-oragange);
+}
+
+input[type=text] {
+    font-family: 'Luckiest Guy', cursive;
+    border: none;
+    padding: 2px;
 }
 
 button {
-    background-color: var(--main-oragange);
-    color: black;
+    background-color: var(--dark-orange);
+    font-family: 'Luckiest Guy', cursive;
+    font-size: medium;
     padding: 5px;
-    border-radius: 25px;
+    border-radius: 5px;
+    border: 2px solid var(--main-oragange);
+    margin: 2px;
+}
+
+button:valid:hover {
+    background-color: var(--main-blue);
+    color: var(--dark-orange);
+}
+
+button:disabled {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+}
+
+#state {
+    grid-column: 1 / -1;
+    width: 100%;
+    font-size: large;
+    height: 30px;
+    text-align: center;
+    padding: 2px;
+    background-color: var(--light-blue);
+
+    color: var(--main-oragange);
+    font-family: 'Luckiest Guy', cursive;
+    border-bottom: 5px solid var(--main-blue);
 }
 
 /* footer */
 footer {
-    position: absolute;
-    /* position: fixed; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    height: 50px;
+    height: 100px;
     background-color: var(--dark-black);
+    text-align: center;
+    color: var(--main-oragange);
+}
+
+footer h4 {
+    font-family: 'Luckiest Guy', cursive;
+    padding-top: 10px;
+    letter-spacing: 0.2em;
 }

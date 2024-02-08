@@ -121,7 +121,7 @@ function removeBigDivs() {
     }
 }
 
-function clarEventos() {
+function cleatEvents() {
     let positionShip = positionBoard.querySelectorAll('.ship');
     for (const pointShip of positionShip) {
         pointShip.removeEventListener("mouseenter", mouseenterHandler)
@@ -224,7 +224,7 @@ function makingNewDiv() {
         newDiv.style.display = "none"
         newDiv.setAttribute('id', `${cls}`)
         newDiv.classList.add(`${direccion}_${sizeDiv}`)
-        newDiv.style.border = "solid 5px red"
+        newDiv.style.border = "solid 5px #ff5d00"
         newDiv.setAttribute('draggable', "true")
 
         if (direccion === "hrz") {
@@ -239,4 +239,4 @@ function makingNewDiv() {
     }
 }
 
-export { makingNewDiv, controlDrag }
+export { makingNewDiv, controlDrag, removeBigDivs, cleatEvents }

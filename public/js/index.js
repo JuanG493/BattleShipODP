@@ -1,6 +1,6 @@
 import './style.css';
 import Player from './player.js';
-import { makingNewDiv, controlDrag } from './dragControler.js';
+import { makingNewDiv, controlDrag, removeBigDivs, cleatEvents } from './dragControler.js';
 import { playMachine } from './machineLogic.js';
 // import { allowedAttack } from './socketIOControl.js';
 
@@ -92,6 +92,7 @@ btnRandom.addEventListener("click", () => {
     cleanArea()
     started()
     player = new Player(gameModeSelected());
+    machineAsOponent = new Player(gameModeSelected());
     positionShipsOn(player)
     controlDrag();
 })
@@ -133,8 +134,6 @@ btnMakeArmy.addEventListener("click", async () => {
         }
     }
 })
-//................................................................................
-
 
 
 function hablePanel() {
@@ -149,6 +148,8 @@ function hablePanel() {
 }
 
 btnPlay.addEventListener("click", async () => {
+    removeBigDivs();
+    cleatEvents();
     disabledHtmlBtn(btnPlay, true)
     disabledHtmlBtn(btnRandom, true)
     switch (selectionOponentMenu) {
@@ -167,6 +168,7 @@ btnPlay.addEventListener("click", async () => {
             break;
     }
 })
+
 
 function cleanArea() {
     player = null;
@@ -241,9 +243,12 @@ async function turns(pjCurrentTurn, pjTarget, turn) {
         if (turn) {
             displayTurn.innerText = "Human Turn"
             let pointTarget = await attack()
+            // console.log("point target: ", pointTarget);
             drawPointOfAttack(attackBoard, pointTarget)
             let wasHit = await checkHit(pointTarget, pjCurrentTurn, pjTarget);
             if (wasHit) {
+
+                let divTarget = attackBoard.querySelector(`div[data-value="${pointTarget}"]`)
                 navHit(divTarget)
                 //the actual PJ continue with the turn
                 turns(pjCurrentTurn, pjTarget, true)
@@ -302,6 +307,7 @@ function drawPointOfAttack(board, point) {
 }
 
 function navHit(ship) {
+    // console.log(ship);j
     ship.classList.add("nav_hit")
 }
 // check if a ship was hit, if so call the methos to discount points 
